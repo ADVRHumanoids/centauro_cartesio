@@ -1,5 +1,5 @@
 solver_options:
-    regularization: 1e-2
+    regularization: 1e-4
     back_end: "osqp"
 
 #stack:
@@ -53,24 +53,28 @@ Rolling_FL:
     wheel_name: "wheel_1"
     lib_name: "libcentauro_cartesio_addon.so"
     wheel_radius: 0.078
+    weight: 1000.0
     
 Rolling_FR:
     type: "WheelRolling"
     wheel_name: "wheel_2"
     lib_name: "libcentauro_cartesio_addon.so"
     wheel_radius: 0.078
+    weight: 1000.0
     
 Rolling_HL:
     type: "WheelRolling"
     wheel_name: "wheel_3"
     lib_name: "libcentauro_cartesio_addon.so"
     wheel_radius: 0.078
+    weight: 1000.0
     
 Rolling_HR:
     type: "WheelRolling"
     wheel_name: "wheel_4"
     lib_name: "libcentauro_cartesio_addon.so"
     wheel_radius: 0.078
+    weight: 1000.0
     
 Waist:
     type: "Cartesian"

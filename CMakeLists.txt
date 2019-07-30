@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   cartesian_interface
   message_generation
   geometry_msgs
+  eigen_conversions
 )
 
 find_package(OpenSoT REQUIRED)
