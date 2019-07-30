@@ -47,6 +47,8 @@
         <param name="wheel_2/dofs" type="yaml" value="[0, 1, 2]"/>
         <param name="wheel_3/dofs" type="yaml" value="[0, 1, 2]"/>
         <param name="wheel_4/dofs" type="yaml" value="[0, 1, 2]"/>
+		
+		<remap from="~torque_offset" to="cartesian/torque_offset"/>
         
     </node>
 
