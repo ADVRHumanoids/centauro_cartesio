@@ -163,6 +163,19 @@ def main():
     ci.setWaypoints('car_frame', wp_list, True)
     ci.waitReachCompleted('car_frame')
 
+    ci.setTargetPose('arm1_8', Affine3(pos=[0.4, 0, 0.4]), time, True)
+    ci.setTargetPose('arm2_8', Affine3(pos=[0.4, 0, 0.4]), time, True)
+    ci.waitReachCompleted('arm1_8')
+    ci.waitReachCompleted('arm2_8')
+
+    rospy.sleep(2.0)
+
+    ci.setTargetPose('arm1_8', Affine3(pos=[-0.4, 0, -0.4]), time, True)
+    ci.setTargetPose('arm2_8', Affine3(pos=[-0.4, 0, -0.4]), time, True)
+    ci.waitReachCompleted('arm1_8')
+    ci.waitReachCompleted('arm2_8')
+
+
     ci.setControlMode('pelvis',pyci.ControlType.Position)
 
 
