@@ -31,11 +31,13 @@ def main():
     ci.setVelocityReferenceAsync('car_frame', vref, -1.0)
 
     # pelvis down
+    print 'Pelvis down..'
     ci.setTargetPose('pelvis', Affine3(pos=[0, 0, -0.1]), time)
     ci.waitReachCompleted('pelvis')
     base_pose_initial, _, _ = ci.getPoseReference('pelvis')
 
     # narrow support
+    print 'Narrow support..'
     ci.update()
     b_t_w = ci.getPoseReference('wheel_1')[0]
     ci.setTargetPose('wheel_1', Affine3(pos=[0.5,  0.25,  b_t_w.translation[2]]), time)
@@ -53,6 +55,7 @@ def main():
     rospy.sleep(1.0)
 
     # wide support
+    print 'Wide support..'
     b_t_w = ci.getPoseReference('wheel_1')[0]
     ci.setTargetPose('wheel_1', Affine3(pos=[0.3, 0.5, b_t_w.translation[2]]), time)
 
@@ -69,6 +72,7 @@ def main():
     rospy.sleep(1.0)
 
     # homing support
+    print 'Homing support..'
     b_t_w = ci.getPoseReference('wheel_1')[0]
     ci.setTargetPose('wheel_1', Affine3(pos=[0.35, 0.35, b_t_w.translation[2]]), time)
 
@@ -85,6 +89,7 @@ def main():
     rospy.sleep(1.0)
 
     # left-right with waist
+    print 'Pelvis left right..'
     ci.update()
     b_t_p = ci.getPoseReference('pelvis')[0]
     print 'Waist pose is ', b_t_p
@@ -96,6 +101,7 @@ def main():
     ci.waitReachCompleted('pelvis')
 
     # front-back with waist
+    print 'Pelvis front back..'
     ci.setTargetPose('pelvis', Affine3(pos=[0.15, 0.0, b_t_p.translation[2]]), time)
     ci.waitReachCompleted('pelvis')
 
@@ -106,6 +112,11 @@ def main():
     ci.waitReachCompleted('pelvis')
 
     # turn left-right with waist
+    print 'Pelvis rotate..'
+
+    ci.setBaseLink('arm1_8', 'car_frame')
+    ci.setBaseLink('arm2_8', 'car_frame')
+
     ci.setTargetPose('pelvis', Affine3(rot=[0, 0,  sin_1, cos_1]), time/2.0, True)
     ci.waitReachCompleted('pelvis')
 
@@ -120,18 +131,23 @@ def main():
     dt = 0.01
     tstop = time
 
+    print 'Stopping rolling..'
     while t < tstop:
         vref_t = vref * (tstop - t)/tstop
         ci.setVelocityReference('car_frame', vref_t)
         rospy.sleep(dt)
         t += dt
 
-    ci.stopVelocityReferenceAsync('car_frame')
+    # ci.stopVelocityReferenceAsync('car_frame')
+
+    ci.setBaseLink('arm1_8', 'torso_2')
+    ci.setBaseLink('arm2_8', 'torso_2')
     ci.setControlMode('car_frame', pyci.ControlType.Position)
 
     raw_input('Press ENTER to continue')
 
     # base w.r.t. world and move the virtual frame
+    print 'Move virtual frame with fixed pelvis..'
     ci.setBaseLink('pelvis', 'world')
 
     ci.setTargetPose('car_frame', Affine3(pos=[0.15, 0, 0]), time, True)
@@ -165,9 +181,16 @@ def main():
     raw_input('Press ENTER to continue')
 
     # ee w.r.t. world
+    print 'Chicken head..'
     ci.setBaseLink('arm1_8', 'world')
     ci.setBaseLink('arm2_8', 'world')
     ci.setControlMode('pelvis', pyci.ControlType.Disabled)
+
+    print 'High manipulation..'
+    ci.setTargetPose('arm1_8', Affine3(pos=[0.0, 0, 0.4]), time, True)
+    ci.setTargetPose('arm2_8', Affine3(pos=[0.0, 0, 0.4]), time, True)
+    ci.waitReachCompleted('arm1_8')
+    ci.waitReachCompleted('arm2_8')
 
     wp_list = list()
     wp_list.append(pyci.WayPoint(Affine3(pos=[-0.30, 0, 0]), time))
@@ -179,15 +202,9 @@ def main():
     ci.setWaypoints('car_frame', wp_list, True)
     ci.waitReachCompleted('car_frame')
 
-    ci.setTargetPose('arm1_8', Affine3(pos=[0.4, 0, 0.4]), time, True)
-    ci.setTargetPose('arm2_8', Affine3(pos=[0.4, 0, 0.4]), time, True)
-    ci.waitReachCompleted('arm1_8')
-    ci.waitReachCompleted('arm2_8')
 
-    rospy.sleep(2.0)
-
-    ci.setTargetPose('arm1_8', Affine3(pos=[-0.4, 0, -0.4]), time, True)
-    ci.setTargetPose('arm2_8', Affine3(pos=[-0.4, 0, -0.4]), time, True)
+    ci.setTargetPose('arm1_8', Affine3(pos=[-0.0, 0, -0.4]), time, True)
+    ci.setTargetPose('arm2_8', Affine3(pos=[-0.0, 0, -0.4]), time, True)
     ci.waitReachCompleted('arm1_8')
     ci.waitReachCompleted('arm2_8')
 
