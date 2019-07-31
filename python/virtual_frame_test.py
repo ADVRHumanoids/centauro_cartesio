@@ -101,6 +101,7 @@ def main():
     t = 0
     dt = 0.01
     tstop = time
+
     while t < tstop:
         vref_t = vref * (tstop - t)/tstop
         ci.setVelocityReference('car_frame', vref_t)
@@ -113,11 +114,11 @@ def main():
     # base w.r.t. world and move the virtual frame
     ci.setBaseLink('pelvis', 'world')
 
-    ci.setTargetPose('car_frame', Affine3(pos=[0.10, 0, 0]), time, True)
+    ci.setTargetPose('car_frame', Affine3(pos=[0.15, 0, 0]), time, True)
     ci.waitReachCompleted('car_frame')
-    ci.setTargetPose('car_frame', Affine3(pos=[-0.20, 0, 0]), time, True)
+    ci.setTargetPose('car_frame', Affine3(pos=[-0.30, 0, 0]), time, True)
     ci.waitReachCompleted('car_frame')
-    ci.setTargetPose('car_frame', Affine3(pos=[0.10, 0, 0]), time, True)
+    ci.setTargetPose('car_frame', Affine3(pos=[0.15, 0, 0]), time, True)
     ci.waitReachCompleted('car_frame')
 
     ci.setTargetPose('car_frame', Affine3(pos=[0, 0.075, 0]), time, True)
@@ -144,9 +145,9 @@ def main():
     # base w.r.t virtual frame
     ci.setBaseLink('pelvis', 'car_frame')
 
-    # base and virtual frame to starting pose
-    ci.setTargetPose('car_frame', vf_pose_initial, time)
-    ci.setTargetPose('pelvis', base_pose_initial, time)
+    # # base and virtual frame to starting pose
+    # ci.setTargetPose('car_frame', vf_pose_initial, time)
+    # ci.setTargetPose('pelvis', base_pose_initial, time)
 
     # ee w.r.t. world
     ci.setBaseLink('arm1_8', 'world')
@@ -175,8 +176,20 @@ def main():
     ci.waitReachCompleted('arm1_8')
     ci.waitReachCompleted('arm2_8')
 
+    ci.setControlMode('pelvis', pyci.ControlType.Position)
 
-    ci.setControlMode('pelvis',pyci.ControlType.Position)
+    ci.setTargetPose('pelvis', Affine3(pos=[0.1, 0, 0]), time, True)
+    ci.waitReachCompleted('pelvis')
+
+    ci.setTargetPose('wheel_4', Affine3(pos=[0, 0, 0.35]), time/2., True)
+    ci.waitReachCompleted('wheel_4')
+
+    ci.setTargetPose('wheel_4', Affine3(pos=[0, 0, -0.35]), time/2., True)
+    ci.waitReachCompleted('wheel_4')
+
+    ci.setTargetPose('pelvis', Affine3(pos=[-0.1, 0, 0]), time, True)
+    ci.waitReachCompleted('pelvis')
+
 
 
 if __name__ == '__main__':
