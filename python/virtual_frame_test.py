@@ -14,6 +14,14 @@ def main():
     # define time between waypoints
     time = 3.0
 
+    # angles for later use
+    angle_1 = 15.0
+    angle_2 = 30.0
+    sin_1 = math.sin(angle_1/2.0/180.0*math.pi)
+    cos_1 = math.cos(angle_1/2.0/180.0*math.pi)
+    sin_2 = math.sin(angle_2/2.0/180.0*math.pi)
+    cos_2 = math.cos(angle_2/2.0/180.0*math.pi)
+
     # initial virtual frame pose
     vf_pose_initial, _, _ = ci.getPoseReference('car_frame')
 
@@ -42,7 +50,7 @@ def main():
     ci.setTargetPose('wheel_4', Affine3(pos=[-0.5, -0.25, b_t_w.translation[2]]), time)
 
     ci.waitReachCompleted('wheel_4')
-    rospy.sleep(2.0)
+    rospy.sleep(1.0)
 
     # wide support
     b_t_w = ci.getPoseReference('wheel_1')[0]
@@ -58,7 +66,7 @@ def main():
     ci.setTargetPose('wheel_4', Affine3(pos=[-0.3, -0.5, b_t_w.translation[2]]), time)
 
     ci.waitReachCompleted('wheel_4')
-    rospy.sleep(2.0)
+    rospy.sleep(1.0)
 
     # homing support
     b_t_w = ci.getPoseReference('wheel_1')[0]
@@ -74,7 +82,7 @@ def main():
     ci.setTargetPose('wheel_4', Affine3(pos=[-0.35, -0.35, b_t_w.translation[2]]), time)
 
     ci.waitReachCompleted('wheel_4')
-    rospy.sleep(2.0)
+    rospy.sleep(1.0)
 
     # left-right with waist
     ci.update()
@@ -97,6 +105,16 @@ def main():
     ci.setTargetPose('pelvis', Affine3(pos=[0.0, 0.0, b_t_p.translation[2]]), time)
     ci.waitReachCompleted('pelvis')
 
+    # turn left-right with waist
+    ci.setTargetPose('pelvis', Affine3(rot=[0, 0,  sin_1, cos_1]), time/2.0, True)
+    ci.waitReachCompleted('pelvis')
+
+    ci.setTargetPose('pelvis', Affine3(rot=[0, 0, -sin_2, cos_2]), time/2.0, True)
+    ci.waitReachCompleted('pelvis')
+
+    ci.setTargetPose('pelvis', Affine3(rot=[0, 0,  sin_1, cos_1]), time/2.0, True)
+    ci.waitReachCompleted('pelvis')
+
     # ramp down virtual frame speed
     t = 0
     dt = 0.01
@@ -110,6 +128,8 @@ def main():
 
     ci.stopVelocityReferenceAsync('car_frame')
     ci.setControlMode('car_frame', pyci.ControlType.Position)
+
+    raw_input('Press ENTER to continue')
 
     # base w.r.t. world and move the virtual frame
     ci.setBaseLink('pelvis', 'world')
@@ -128,13 +148,6 @@ def main():
     ci.setTargetPose('car_frame', Affine3(pos=[0, 0.075, 0]), time, True)
     ci.waitReachCompleted('car_frame')
 
-    angle_1 = 15.0
-    angle_2 = 30.0
-    sin_1 = math.sin(angle_1 / 2.0 / 180.0 * math.pi)
-    cos_1 = math.cos(angle_1 / 2.0 / 180.0 * math.pi)
-    sin_2 = math.sin(angle_2 / 2.0 / 180.0 * math.pi)
-    cos_2 = math.cos(angle_2 / 2.0 / 180.0 * math.pi)
-
     ci.setTargetPose('car_frame', Affine3(rot=[0, 0,  sin_1, cos_1]), time, True)
     ci.waitReachCompleted('car_frame')
     ci.setTargetPose('car_frame', Affine3(rot=[0, 0, -sin_2, cos_2]), time, True)
@@ -148,6 +161,8 @@ def main():
     # # base and virtual frame to starting pose
     # ci.setTargetPose('car_frame', vf_pose_initial, time)
     # ci.setTargetPose('pelvis', base_pose_initial, time)
+
+    raw_input('Press ENTER to continue')
 
     # ee w.r.t. world
     ci.setBaseLink('arm1_8', 'world')
