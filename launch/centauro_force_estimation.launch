@@ -3,7 +3,11 @@
 	<node pkg="centauro_tools" 
           type="centauro_cop_estimation" 
           name="centauro_cop_estimation"
-          output="screen"/>
+          output="screen">
+		  
+		  <param name="rate" value="200.0"/>
+		  
+	</node>
 
      
     <node pkg="cartesian_interface" 
@@ -26,7 +30,7 @@
 		<param name="wheel_3/dofs" type="yaml" value="[0, 1, 2]"/>
         <param name="wheel_4/dofs" type="yaml" value="[0, 1, 2]"/>
 
-	<param name="rate" value="200.0"/>
+		<param name="rate" value="200.0"/>
         
     </node>
 
