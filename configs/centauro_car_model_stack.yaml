@@ -1,6 +1,8 @@
 solver_options:
-    regularization: 1e-4
-    back_end: "osqp"
+    regularization: 0
+    back_end: "qpoases"
+    front_end: "nhqp"
+    nhqp_min_sv_ratio: 0.05
 
 #stack:
     #- ["Postural"]
@@ -9,7 +11,7 @@ solver_options:
 
 stack:
     - ["Car", "Wheel_FL", "Wheel_FR", "Wheel_HR", "Wheel_HL", "Steering_FL", "Steering_FR", "Steering_HL","Steering_HR", "LeftArm", "RightArm"] #, "Gaze"]
-    - ["Waist",  "Ankle_FL", "Ankle_FR", "Ankle_HR", "Ankle_HL", "Rolling_FL", "Rolling_FR","Rolling_HL","Rolling_HR"]
+    - ["Waist",  "Rolling_FL", "Rolling_FR","Rolling_HL","Rolling_HR","Ankle_FL", "Ankle_FR", "Ankle_HR", "Ankle_HL"]
     - ["Postural"]
 
 constraints: ["JointLimits", "VelocityLimits"]
