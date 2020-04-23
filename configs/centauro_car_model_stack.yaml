@@ -11,10 +11,13 @@ solver_options:
 
 stack:
     - ["Car", "Wheel_FL", "Wheel_FR", "Wheel_HR", "Wheel_HL", "Steering_FL", "Steering_FR", "Steering_HL","Steering_HR", "LeftArm", "RightArm"] #, "Gaze"]
-    - ["Waist",  "Rolling_FL", "Rolling_FR","Rolling_HL","Rolling_HR","Ankle_FL", "Ankle_FR", "Ankle_HR", "Ankle_HL"]
+    - ["Waist", "Rolling_FL", "Rolling_FR", "Rolling_HL","Rolling_HR","Ankle_FL", "Ankle_FR", "Ankle_HR", "Ankle_HL"]
     - ["Postural"]
 
 constraints: ["JointLimits", "VelocityLimits"]
+
+defaults:
+ - &local_frame "car_frame"
 
 Gaze:
     type: "Gaze"
@@ -23,7 +26,7 @@ Gaze:
 
 Car:
     type: "Cartesian"
-    distal_link: "car_frame"
+    distal_link: *local_frame
     lambda: 0.1
 
 Steering_FL:
@@ -81,14 +84,14 @@ Rolling_HR:
 Waist:
     type: "Cartesian"
     distal_link: "pelvis"
-    base_link: "car_frame"
+    base_link: *local_frame
     lambda: 0.1
     weight: 10.0
     
 Wheel_FL:
     type: "Cartesian"
     distal_link: "wheel_1"
-    base_link: "car_frame"
+    base_link: *local_frame
     indices: [0, 1, 2]
     lambda: 0.1
     disabled_joints: ["ankle_yaw_1", "j_wheel_1"]
@@ -96,7 +99,7 @@ Wheel_FL:
 Wheel_FR:
     type: "Cartesian"
     distal_link: "wheel_2"
-    base_link: "car_frame"
+    base_link: *local_frame
     indices: [0, 1, 2]
     lambda: 0.1
     disabled_joints: ["ankle_yaw_2", "j_wheel_2"]
@@ -104,7 +107,7 @@ Wheel_FR:
 Wheel_HL:
     type: "Cartesian"
     distal_link: "wheel_3"
-    base_link: "car_frame"
+    base_link: *local_frame
     indices: [0, 1, 2]
     lambda: 0.1
     disabled_joints: ["ankle_yaw_3", "j_wheel_3"]
@@ -112,7 +115,7 @@ Wheel_HL:
 Wheel_HR:
     type: "Cartesian"
     distal_link: "wheel_4"
-    base_link: "car_frame"
+    base_link: *local_frame
     indices: [0, 1, 2]
     lambda: 0.1
     disabled_joints: ["ankle_yaw_4", "j_wheel_4"]
@@ -120,7 +123,7 @@ Wheel_HR:
 Ankle_FL:
     type: "Cartesian"
     distal_link: "ankle1_1"
-    base_link: "car_frame"
+    base_link: *local_frame
     indices: [3, 4]
     lambda: 0.02
     weight: 10.0
@@ -128,7 +131,7 @@ Ankle_FL:
 Ankle_FR:
     type: "Cartesian"
     distal_link: "ankle1_2"
-    base_link: "car_frame"
+    base_link: *local_frame
     indices: [3, 4]
     lambda: 0.02
     weight: 10.0
@@ -136,7 +139,7 @@ Ankle_FR:
 Ankle_HL:
     type: "Cartesian"
     distal_link: "ankle1_3"
-    base_link: "car_frame"
+    base_link: *local_frame
     indices: [3, 4]
     lambda: 0.02
     weight: 10.0
@@ -144,7 +147,7 @@ Ankle_HL:
 Ankle_HR:
     type: "Cartesian"
     distal_link: "ankle1_4"
-    base_link: "car_frame"
+    base_link: *local_frame
     indices: [3, 4]
     lambda: 0.02
     weight: 10.0
@@ -181,3 +184,9 @@ Com:
     lambda: 0.05
     indices: [0, 1]
     weight: 10
+
+JointLimits:
+    type: JointLimits
+
+VelocityLimits:
+    type: VelocityLimits
