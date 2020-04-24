@@ -130,6 +130,8 @@ add_library(centauro_cartesio_addon
   src/cartesio_addon.cpp
 )
 
+add_dependencies(centauro_cartesio_addon ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 # Specify libraries to link a library or executable target against
 target_link_libraries(centauro_cartesio_addon
   ${catkin_LIBRARIES}
