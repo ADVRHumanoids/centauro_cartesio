@@ -1,0 +1,86 @@
+solver_options:
+    regularization: 0
+    back_end: "qpoases"
+    front_end: "nhqp"
+    nhqp_min_sv_ratio: 0.05
+
+stack:
+    - ["Waist", "Postural"]
+    - ["Steering_FL", "Steering_FR", "Steering_HL", "Steering_HR", "Rolling_FL", "Rolling_FR", "Rolling_HL","Rolling_HR"] #, "Gaze"]
+
+constraints: ["JointLimits", "VelocityLimits"]
+
+Waist:
+    type: "Cartesian"
+    distal_link: "pelvis"
+
+Steering_FL:
+    type: "CentauroSteering"
+    wheel_name: "wheel_1"
+    lib_name: "libcentauro_cartesio_addon.so"
+    lambda: 0.1
+
+Steering_FR:
+    type: "CentauroSteering"
+    wheel_name: "wheel_2"
+    lib_name: "libcentauro_cartesio_addon.so"
+    lambda: 0.1
+
+Steering_HL:
+    type: "CentauroSteering"
+    wheel_name: "wheel_3"
+    lib_name: "libcentauro_cartesio_addon.so"
+    lambda: 0.1
+
+Steering_HR:
+    type: "CentauroSteering"
+    wheel_name: "wheel_4"
+    lib_name: "libcentauro_cartesio_addon.so"
+    lambda: 0.1
+
+Rolling_FL:
+    type: "WheelRolling"
+    wheel_name: "wheel_1"
+    lib_name: "libcentauro_cartesio_addon.so"
+    wheel_radius: 0.078
+    weight: 1000.0
+
+Rolling_FR:
+    type: "WheelRolling"
+    wheel_name: "wheel_2"
+    lib_name: "libcentauro_cartesio_addon.so"
+    wheel_radius: 0.078
+    weight: 1000.0
+
+Rolling_HL:
+    type: "WheelRolling"
+    wheel_name: "wheel_3"
+    lib_name: "libcentauro_cartesio_addon.so"
+    wheel_radius: 0.078
+    weight: 1000.0
+
+Rolling_HR:
+    type: "WheelRolling"
+    wheel_name: "wheel_4"
+    lib_name: "libcentauro_cartesio_addon.so"
+    wheel_radius: 0.078
+    weight: 1000.0
+
+Postural:
+    type: "Postural"
+    lambda: 0.1
+    disabled_joints:
+      - ankle_yaw_1
+      - ankle_yaw_2
+      - ankle_yaw_3
+      - ankle_yaw_4
+      - j_wheel_1
+      - j_wheel_2
+      - j_wheel_3
+      - j_wheel_4
+
+JointLimits:
+    type: JointLimits
+
+VelocityLimits:
+    type: VelocityLimits
