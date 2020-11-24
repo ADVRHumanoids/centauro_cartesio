@@ -8,13 +8,14 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  cartesian_interface
   message_generation
   geometry_msgs
   eigen_conversions
 )
 
 find_package(OpenSoT REQUIRED)
+
+find_package(cartesian_interface REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -136,6 +137,7 @@ add_dependencies(centauro_cartesio_addon ${${PROJECT_NAME}_EXPORTED_TARGETS} ${c
 target_link_libraries(centauro_cartesio_addon
   ${catkin_LIBRARIES}
   ${OpenSoT_LIBRARIES}
+  ${cartesian_interface_LIBRARIES}
 )
 
 # Mark executables and/or libraries for installation
