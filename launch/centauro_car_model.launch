@@ -10,10 +10,10 @@
         textfile="$(find centauro_cartesio)/configs/srdf/centauro_car.srdf"/>
         
     <param name="robot_description" 
-        textfile="$(env ROBOTOLOGY_ROOT)/configs/CentauroConfig/urdf/centauro.urdf"/>
+        textfile="$(find centauro_urdf)/urdf/centauro.urdf"/>
     
     <param name="robot_description_semantic"
-        textfile="$(env ROBOTOLOGY_ROOT)/configs/CentauroConfig/srdf/centauro.srdf"/>
+        textfile="$(find centauro_srdf)/srdf/centauro.srdf"/>
     
     <param name="cartesian/problem_description" 
         textfile="$(find centauro_cartesio)/configs/centauro_car_model_stack.yaml"/>
