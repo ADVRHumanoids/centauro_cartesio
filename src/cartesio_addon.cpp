@@ -101,6 +101,7 @@ struct WheelRollingTask : public TaskDescriptionImpl
     std::string wheel_name;
     double wheel_radius;
     Eigen::Vector3d contact_plane_normal;
+    bool include_z_axis;
     
     WheelRollingTask(YAML::Node task_node,
                      Context::ConstPtr ctx);
@@ -112,15 +113,16 @@ WheelRollingTask::WheelRollingTask(YAML::Node task_node,
                          ctx,
                          "rolling_" + task_node["wheel_name"].as<std::string>(),
                          2),
-    contact_plane_normal(0, 0, 1.)
+    contact_plane_normal(0, 0, 1.),
+    include_z_axis(false)
 {
     wheel_name = task_node["wheel_name"].as<std::string>();
 
     wheel_radius = task_node["wheel_radius"].as<double>();
 
-    if(task_node["contact_plane_normal"])
+    if(auto n = task_node["contact_plane_normal"])
     {
-        auto contact_plane_normal_std = task_node["contact_plane_normal"].as<std::vector<double>>();
+        auto contact_plane_normal_std = n.as<std::vector<double>>();
 
         if(contact_plane_normal_std.size() != 3)
         {
@@ -128,6 +130,11 @@ WheelRollingTask::WheelRollingTask(YAML::Node task_node,
         }
 
         contact_plane_normal = Eigen::Vector3d::Map(contact_plane_normal_std.data());
+    }
+
+    if(auto n = task_node["include_z_axis"])
+    {
+        include_z_axis = n.as<bool>();
     }
 }
 
@@ -155,7 +162,8 @@ public:
         auto sot_rolling = boost::make_shared<OpenSoT::tasks::velocity::PureRollingPosition>
                         (_ci_rolling->wheel_name,
                          _ci_rolling->wheel_radius,
-                         *_model
+                         *_model,
+                         _ci_rolling->include_z_axis
                          );
 
         return sot_rolling;
