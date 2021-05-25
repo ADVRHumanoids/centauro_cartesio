@@ -73,7 +73,7 @@ public:
     
     TaskPtr constructTask() override
     {
-        _sot_steering = boost::make_shared<OpenSoT::tasks::velocity::CentauroAnkleSteering>
+        _sot_steering = std::make_shared<OpenSoT::tasks::velocity::CentauroAnkleSteering>
                 (_ci_steering->wheel_name,
                  _model,
                  _ctx->params()->getControlPeriod(),
@@ -86,7 +86,7 @@ public:
     
 private:
     
-    boost::shared_ptr<OpenSoT::tasks::velocity::CentauroAnkleSteering> _sot_steering;
+    std::shared_ptr<OpenSoT::tasks::velocity::CentauroAnkleSteering> _sot_steering;
     CentauroSteeringTask::Ptr _ci_steering;
     
 };
@@ -159,7 +159,7 @@ public:
 
     TaskPtr constructTask() override
     {
-        auto sot_rolling = boost::make_shared<OpenSoT::tasks::velocity::PureRollingPosition>
+        auto sot_rolling = std::make_shared<OpenSoT::tasks::velocity::PureRollingPosition>
                         (_ci_rolling->wheel_name,
                          _ci_rolling->wheel_radius,
                          *_model,
