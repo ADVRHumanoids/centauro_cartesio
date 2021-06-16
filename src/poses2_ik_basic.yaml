@@ -1,0 +1,62 @@
+solver_options:
+    regularization: 1e-2
+    back_end: qpoases
+    
+stack:
+    - [Wheel_FL, Wheel_FR, Wheel_HR, Wheel_HL]
+    - [LeftArm, RightArm, Com]
+    - [Postural]
+
+constraints: [JointLimits, VelocityLimits]
+
+JointLimits:
+    type: JointLimits
+    
+VelocityLimits:
+    type: VelocityLimits
+    
+Wheel_FL:
+    type: Cartesian
+    distal_link: wheel_1
+    base_link: world
+    lambda: 0.1
+
+Wheel_FR:
+    type: Cartesian
+    distal_link: wheel_2
+    base_link: world
+    lambda: 0.1
+
+Wheel_HL:
+    type: Cartesian
+    distal_link: wheel_3
+    base_link: world
+    lambda: 0.1
+
+Wheel_HR:
+    type: Cartesian
+    distal_link: wheel_4
+    base_link: world
+    lambda: 0.1
+    
+LeftArm:
+    type: Cartesian
+    distal_link: arm1_8
+    base_link: torso_2
+    lambda: 0.1
+
+RightArm:
+    type: Cartesian
+    distal_link: arm2_8
+    base_link: torso_2
+    lambda: 0.1
+    
+Postural:
+    type: Postural
+    lambda: 0.01
+    
+Com:
+    type: Com
+    lambda: 0.05
+    indices: [0, 1]
+    weight: 20

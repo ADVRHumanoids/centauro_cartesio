@@ -1,0 +1,226 @@
+solver_options:
+    regularization: 1e-9
+    back_end: qpoases
+    front_end: ihqp
+    nhqp_min_sv_ratio: 0.05
+
+
+stack:
+    -
+      - LeftArm
+      - RightArm
+      - Com
+      - Ankle_FL
+      - Ankle_FR
+      - Ankle_HR
+      - Ankle_HL
+      - Wheel_FL
+      - Wheel_FR
+      - Wheel_HR
+      - Wheel_HL
+      - Postural
+      - Steering_FL
+      - Steering_FR
+      - Steering_HL
+      - Steering_HR
+      - Rolling_FL
+      - Rolling_FR
+      - Rolling_HL
+      - Rolling_HR
+
+constraints: [JointLimits, VelocityLimits, Collision]
+
+JointLimits:
+    type: JointLimits
+
+VelocityLimits:
+    type: VelocityLimits
+
+Collision:
+    type: CollisionConstraint
+    lib_name: libcartesio_collision_support.so
+    bound_scaling: 0.1
+    distance_threshold: 0.01
+    max_pairs: 30
+    collision_urdf_path: $(rospack find centauro_urdf)/urdf/capsule/centauro_capsules.urdf
+    collision_srdf_path: $(rospack find centauro_srdf)/srdf/capsule/centauro_capsules.srdf
+    # pairs:
+    #  - [ball1, ball2]
+    #  - [wheel_1, wheel_2]
+    #  - [hip1_2, arm1_4]
+    #  - [knee_1, arm1_4]
+    #  - [hip1_2, arm1_5]
+    #  - [knee_1, arm1_5]
+    #  - [hip2_1, arm1_6]
+    #  - [knee_1, arm1_6]
+    #  - [hip2_1, ball1]
+    #  - [knee_1, ball1]
+    #  - [wheel_1, ball1]
+    #  - [wheel_1, arm1_6]
+
+Gaze:
+    type: Gaze
+    lambda: 0.05
+    weight: 1.0
+
+Steering_FL:
+    type: CentauroSteering
+    wheel_name: wheel_1
+    lib_name: libcentauro_cartesio_addon.so
+    lambda: 0.1
+
+Steering_FR:
+    type: CentauroSteering
+    wheel_name: wheel_2
+    lib_name: libcentauro_cartesio_addon.so
+    lambda: 0.1
+
+Steering_HL:
+    type: CentauroSteering
+    wheel_name: wheel_3
+    lib_name: libcentauro_cartesio_addon.so
+    lambda: 0.1
+
+Steering_HR:
+    type: CentauroSteering
+    wheel_name: wheel_4
+    lib_name: libcentauro_cartesio_addon.so
+    lambda: 0.1
+
+Rolling_FL:
+    type: WheelRolling
+    wheel_name: wheel_1
+    lib_name: libcentauro_cartesio_addon.so
+    wheel_radius: 0.078
+    weight: 1.0
+
+Rolling_FR:
+    type: WheelRolling
+    wheel_name: wheel_2
+    lib_name: libcentauro_cartesio_addon.so
+    wheel_radius: 0.078
+    weight: 1.0
+
+Rolling_HL:
+    type: WheelRolling
+    wheel_name: wheel_3
+    lib_name: libcentauro_cartesio_addon.so
+    wheel_radius: 0.078
+    weight: 1.0
+
+Rolling_HR:
+    type: WheelRolling
+    wheel_name: wheel_4
+    lib_name: libcentauro_cartesio_addon.so
+    wheel_radius: 0.078
+    weight: 1.0
+
+Waist:
+    type: Cartesian
+    distal_link: pelvis
+    base_link: world
+    lambda: 0.1
+    weight: 1000.0
+
+Wheel_FL:
+    type: Cartesian
+    distal_link: wheel_1
+    base_link: world
+    indices: [0, 1, 2]
+    weight: 10
+    lambda: 0.1
+    disabled_joints: [ankle_yaw_1, j_wheel_1]
+
+Wheel_FR:
+    type: Cartesian
+    distal_link: wheel_2
+    base_link: world
+    indices: [0, 1, 2]
+    weight: 10
+    lambda: 0.1
+    disabled_joints: [ankle_yaw_2, j_wheel_2]
+
+Wheel_HL:
+    type: Cartesian
+    distal_link: wheel_3
+    base_link: world
+    indices: [0, 1, 2]
+    weight: 10
+    lambda: 0.1
+    disabled_joints: [ankle_yaw_3, j_wheel_3]
+
+Wheel_HR:
+    type: Cartesian
+    distal_link: wheel_4
+    base_link: world
+    indices: [0, 1, 2]
+    weight: 10
+    lambda: 0.1
+    disabled_joints: [ankle_yaw_4, j_wheel_4]
+
+Ankle_FL:
+    type: Cartesian
+    distal_link: ankle1_1
+    base_link: pelvis
+    indices: [3, 4]
+    lambda: 0.02
+    weight: 100
+
+Ankle_FR:
+    type: Cartesian
+    distal_link: ankle1_2
+    base_link: pelvis
+    indices: [3, 4]
+    lambda: 0.02
+    weight: 100
+
+Ankle_HL:
+    type: Cartesian
+    distal_link: ankle1_3
+    base_link: pelvis
+    indices: [3, 4]
+    lambda: 0.02
+    weight: 100
+
+Ankle_HR:
+    type: Cartesian
+    distal_link: ankle1_4
+    base_link: pelvis
+    indices: [3, 4]
+    lambda: 0.02
+    weight: 100
+
+LeftArm:
+    type: Cartesian
+    distal_link: arm1_8
+    base_link: world
+    lambda: 0.1
+    indices: [0, 1, 2]
+
+RightArm:
+    type: Cartesian
+    distal_link: arm2_8
+    base_link: world
+    lambda: 0.1
+    indices: [0, 1, 2]
+
+
+Postural:
+    type: Postural
+    lambda: 0.01
+    weight: 0.001
+    disabled_joints:
+      - ankle_yaw_1
+      - ankle_yaw_2
+      - ankle_yaw_3
+      - ankle_yaw_4
+      - j_wheel_1
+      - j_wheel_2
+      - j_wheel_3
+      - j_wheel_4
+
+Com:
+    type: Com
+    lambda: 0.05
+    indices: [0, 1]
+    weight: 1
