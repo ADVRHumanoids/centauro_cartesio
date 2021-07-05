@@ -388,15 +388,17 @@ class coll_avoid_demo(sequence):
         # old man watching construction site
         Tr = rstart.copy()
         Tr.translation[0] -= 1.0
+        Tr.translation[1] -= 0.15
 
         Tl = lstart.copy()
         Tl.translation[0] -= 1.0
+        Tl.translation[1] = 0.15
 
-        states.append(lambda Tr=Tr, Tl=Tl: goto([lhand, rhand], [Tl, Tr], [4.0, 4.0]))
-        states.append(lambda: wait_converged(lambda: True))
+        # states.append(lambda Tr=Tr, Tl=Tl: goto([lhand, rhand], [Tl, Tr], [6.0, 6.0]))
+        # states.append(lambda: wait_converged(lambda: True))
 
-        states.append(lambda Tr=rstart, Tl=lstart: goto([lhand, rhand], [Tl, Tr], [4.0, 4.0]))
-        states.append(lambda: wait_converged(lambda: True))
+        # states.append(lambda Tr=rstart, Tl=lstart: goto([lhand, rhand], [Tl, Tr], [6.0, 6.0]))
+        # states.append(lambda: wait_converged(lambda: True))
 
         # disable right, go with left
         def l_ee_off():
@@ -415,41 +417,41 @@ class coll_avoid_demo(sequence):
             return True
 
         states.append(lambda: r_ee_off)
-        states.append(lambda T=T: goto(lhand, T, 3.0))
+        states.append(lambda T=T: goto(lhand, T, 6.0))
         states.append(lambda: wait_time(1.0, lambda: True))
-        states.append(lambda T=lstart: goto(lhand, T, 4.0))
+        states.append(lambda T=lstart: goto(lhand, T, 6.0))
 
         states.append(lambda: l_ee_off)
-        states.append(lambda T=T: goto(rhand, T, 3.0))
+        states.append(lambda T=T: goto(rhand, T, 6.0))
         states.append(lambda: wait_time(1.0, lambda: True))
-        states.append(lambda T=rstart: goto(rhand, T, 4.0))
+        states.append(lambda T=rstart: goto(rhand, T, 6.0))
         
         states.append(lambda: wait_converged(lambda: True))
 
         # extreme right hand motions
         T = rstart.copy()
         T.translation[0] += 1.0
-        states.append(lambda T=T: goto(rhand, T, 4.0))
+        states.append(lambda T=T: goto(rhand, T, 6.0))
         states.append(lambda: wait_time(1.0, lambda: True))
-        states.append(lambda T=rstart: goto(rhand, T, 4.0))
+        states.append(lambda T=rstart: goto(rhand, T, 8.0))
 
         T = rstart.copy()
         T.translation[1] += 1.5
-        states.append(lambda T=T: goto(rhand, T, 4.0))
+        states.append(lambda T=T: goto(rhand, T, 6.0))
         states.append(lambda: wait_time(1.0, lambda: True))
-        states.append(lambda T=rstart: goto(rhand, T, 4.0))
+        states.append(lambda T=rstart: goto(rhand, T, 8.0))
 
         T = rstart.copy()
         T.translation[2] += 1.0
-        states.append(lambda T=T: goto(rhand, T, 4.0))
+        states.append(lambda T=T: goto(rhand, T, 6.0))
         states.append(lambda: wait_time(1.0, lambda: True))
-        states.append(lambda T=rstart: goto(rhand, T, 4.0))
+        states.append(lambda T=rstart: goto(rhand, T, 8.0))
 
         T = rstart.copy()
         T.translation[0] -= 1.5
-        states.append(lambda T=T: goto(rhand, T, 4.0))
+        states.append(lambda T=T: goto(rhand, T, 6.0))
         states.append(lambda: wait_time(1.0, lambda: True))
-        states.append(lambda T=rstart: goto(rhand, T, 4.0))
+        states.append(lambda T=rstart: goto(rhand, T, 8.0))
 
         # com left-right
         states.append(lambda: wait_converged(lambda: True))
@@ -460,11 +462,11 @@ class coll_avoid_demo(sequence):
         for _ in range(2):
             T = comstart.copy()
             T.translation[1] += 0.15
-            states.append(lambda T=T: goto(com, T, 1.0))
+            states.append(lambda T=T: goto(com, T, 2.0))
 
             T = comstart.copy()
             T.translation[1] -= 0.15
-            states.append(lambda T=T: goto(com, T, 1.0))
+            states.append(lambda T=T: goto(com, T, 2.0))
 
         states.append(lambda: wait_converged(lambda: True))
 

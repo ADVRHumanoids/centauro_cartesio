@@ -157,8 +157,8 @@ class rotate_inplace:
     def __init__(self):
         
         self.angles = [0, 1.8, -1.8, 0]
-        self.base_times = [0, 3.0, 7.0, 9.5]
-        self.vf_times = [0.75, 3.25, 7.75, 9.5]
+        self.base_times = [0, 4.5, 10.5, 14]
+        self.vf_times = [1.1, 4.875, 11.625, 14]
         self.t0 = time
         self.base_i = 0
         self.vf_i = 0
@@ -211,12 +211,12 @@ class compact_support:
         T, _, _ = base.getPoseReference()
         T.translation[0] += 0.08
         T.translation[2] += 0.10
-        base.setPoseTarget(T, 2.0)
+        base.setPoseTarget(T, 3.0)
 
         for ref, w in zip(wh_pos, wheels):
             T, _, _ = w.getPoseReference()
             T.translation[:2] = ref 
-            w.setPoseTarget(T, 3.0)
+            w.setPoseTarget(T, 4.5)
 
         return wait_tasks(wheels, lambda: wide_support())
 
@@ -227,12 +227,12 @@ class wide_support:
         wh_pos = all_wheels(np.array([0.4, 0.6]))
         T, _, _ = base.getPoseReference()
         T.translation[2] -= 0.10
-        base.setPoseTarget(T, 2.0)
+        base.setPoseTarget(T, 3.0)
 
         for ref, w in zip(wh_pos, wheels):
             T, _, _ = w.getPoseReference()
             T.translation[:2] = ref 
-            w.setPoseTarget(T, 3.0)
+            w.setPoseTarget(T, 4.5)
 
         return wait_tasks(wheels, lambda: home_support())
 
