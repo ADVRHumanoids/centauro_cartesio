@@ -8,7 +8,7 @@ import yaml
 from os.path import join, dirname, abspath
 import os 
 import argparse
-from math import cos, sin
+from math import cos, sin, trunc
 
 os.environ['XBOT_VERBOSE'] = '2'
 from xbot_interface import xbot_interface as xbi 
@@ -84,7 +84,8 @@ def quintic(alpha):
 rospy.init_node('poses2')
 
 # get augmented kinematic model for ik
-model_cfg = get_xbot_cfg(*get_car_model_urdf_srdf())
+model_cfg = get_xbot_cfg(rospy.get_param('/xbotcore/robot_description'), 
+                        rospy.get_param('/xbotcore/robot_description_semantic')) 
 model = xbi.ModelInterface(model_cfg)
 
 # get robot from standard urdf
@@ -116,15 +117,8 @@ rspub = pyci.RobotStatePublisher(model)
 
 # get ci
 dt = 0.01
-ci_car_frame = get_ci(model, get_ikpb_car_model(), dt)
 ci_basic = get_ci(model, get_ikpb_basic(), dt)
-ci = ci_car_frame
-
-# get some useful tasks
-vf = ci.getTask('car_frame')
-base = ci.getTask('pelvis')
-wheels = [ci.getTask('wheel_' + str(i+1)) for i in range(4)]
-hands = [ci.getTask('arm{}_8'.format(i+1)) for i in range(2)]
+ci = ci_basic
 
 # define tasks
 time = 0.0
@@ -140,188 +134,6 @@ data = Data()
 class noop:
     def __call__(self):
         pass
-
-class pelvis_down:
-    def __init__(self):
-        base.setBaseLink('world')
-        T, _, _ = base.getPoseReference()
-        T.translation[0] -= 0.08
-        T.translation[2] -= 0.10
-        base.setPoseTarget(T, 2.0)
-    def __call__(self):
-        if base.getTaskState() == pyci.State.Online:
-            return rotate_inplace()
-
-class rotate_inplace:
-
-    def __init__(self):
-        
-        self.angles = [0, 1.8, -1.8, 0]
-        self.base_times = [0, 3.0, 7.0, 9.5]
-        self.vf_times = [0.75, 3.25, 7.75, 9.5]
-        self.t0 = time
-        self.base_i = 0
-        self.vf_i = 0
-
-    def __call__(self):
-
-        t = time - self.t0
-
-        # play base trj
-        i = self.base_i 
-        j = self.base_i + 1
-
-        # interpolate and set reference
-        if j < len(self.angles):
-            tau_base = (t - self.base_times[i])/(self.base_times[j] - self.base_times[i])
-            alpha_base = quintic(tau_base)
-            ang_base = self.angles[i] + (self.angles[j] - self.angles[i])*alpha_base
-            Tbase = base.getPoseReference()[0]
-            Tbase.quaternion = [0, 0, sin(ang_base/2), cos(ang_base/2)]
-            base.setPoseReference(Tbase)
-
-            if tau_base > 1.0:
-                self.base_i += 1
-
-        # play vf trj
-        i = self.vf_i 
-        j = self.vf_i + 1
-
-        # interpolate and set reference
-        if j < len(self.angles):
-            tau_vf = (t - self.vf_times[i])/(self.vf_times[j] - self.vf_times[i])
-            alpha_vf = quintic(tau_vf)
-            ang_vf = self.angles[i] + (self.angles[j] - self.angles[i])*alpha_vf
-            Tvf = vf.getPoseReference()[0]
-            Tvf.quaternion = [0, 0, sin(ang_vf/2), cos(ang_vf/2)]
-            vf.setPoseReference(Tvf)
-
-            if tau_vf > 1.0:
-                self.vf_i += 1
-
-        if self.vf_i + 1 == len(self.angles) and self.base_i + 1 == len(self.angles):
-            base.setBaseLink('car_frame')
-            return compact_support()
-
-class compact_support:
-
-    def __call__(self):
-
-        wh_pos = all_wheels(np.array([0.2, 0.2]))
-        T, _, _ = base.getPoseReference()
-        T.translation[0] += 0.08
-        T.translation[2] += 0.10
-        base.setPoseTarget(T, 2.0)
-
-        for ref, w in zip(wh_pos, wheels):
-            T, _, _ = w.getPoseReference()
-            T.translation[:2] = ref 
-            w.setPoseTarget(T, 3.0)
-
-        return wait_tasks(wheels, lambda: wide_support())
-
-class wide_support:
-
-    def __call__(self):
-
-        wh_pos = all_wheels(np.array([0.4, 0.6]))
-        T, _, _ = base.getPoseReference()
-        T.translation[2] -= 0.10
-        base.setPoseTarget(T, 2.0)
-
-        for ref, w in zip(wh_pos, wheels):
-            T, _, _ = w.getPoseReference()
-            T.translation[:2] = ref 
-            w.setPoseTarget(T, 3.0)
-
-        return wait_tasks(wheels, lambda: home_support())
-
-class home_support:
-    
-    def __call__(self):
-
-        wh_pos = all_wheels(np.array([0.35, 0.35]))
-
-        for ref, w in zip(wh_pos, wheels):
-            T, _, _ = w.getPoseReference()
-            T.translation[:2] = ref 
-            w.setPoseTarget(T, 6.0)
-
-        return wait_tasks(wheels, lambda: high_manip())
-
-class high_manip:
-
-    Tstart = dict()
-
-    def __call__(self):
-
-        base.setActivationState(pyci.ActivationState.Disabled)
-        for h in hands:
-            h.setBaseLink('world')
-            T, _, _ = h.getPoseReference()
-            high_manip.Tstart[h.getName()] = T.copy()
-            T.translation[2] += 0.5 
-            h.setPoseTarget(T, 4.0)
-
-        T, _, _ = vf.getPoseReference()
-        high_manip.Tstart[vf.getName()] = T.copy()
-        wpv = list()
-
-        T.translation[0] -= 0.30
-        wpv.append(pyci.WayPoint(T, 3.0))
-
-        theta = 1.0
-        R = Affine3(rot=[0, 0, sin(theta/2), cos(theta/2)])
-        T.linear = np.matmul(R.linear, T.linear)
-        wpv.append(pyci.WayPoint(T, 6.0))
-
-        theta = -2.
-        R = Affine3(rot=[0, 0, sin(theta/2), cos(theta/2)])
-        T.linear = np.matmul(R.linear, T.linear)
-        wpv.append(pyci.WayPoint(T, 9.0))
-
-        theta = 1.
-        R = Affine3(rot=[0, 0, sin(theta/2), cos(theta/2)])
-        T.linear = np.matmul(R.linear, T.linear)
-        wpv.append(pyci.WayPoint(T, 12.0))
-
-        vf.setWayPoints(wpv)
-        return wait_tasks([vf] + hands, lambda: restore_pose())
-
-class restore_pose:
-    def __call__(self):
-
-        for h in hands:
-            h.setPoseTarget(high_manip.Tstart[h.getName()], 4.0)
-
-        vf.setPoseTarget(high_manip.Tstart[vf.getName()], 4.0)
-        
-        def after_task_complete():
-            base.setActivationState(pyci.ActivationState.Enabled)
-            return pelvis_center()
-
-        return wait_tasks(hands + [vf], after_task_complete)
-
-class pelvis_center:
-    def __call__(self):
-        polycenter = sum([t.getPoseReference()[0].translation for t in wheels])
-        polycenter = polycenter / 4.0
-        polycenter[0] -= 0.05
-        T, _, _ = base.getPoseReference()
-        T.translation[:2] = polycenter[:2] 
-        base.setPoseTarget(T, 3.0)
-
-        w = wheels[3]
-        T, _, _ = w.getPoseReference()
-        T.translation[0] += 0.25
-        w.setPoseTarget(T, 2.0)
-
-        w = wheels[0]
-        T, _, _ = w.getPoseReference()
-        T.translation[0] += 0.10
-        w.setPoseTarget(T, 2.0)
-
-        return wait_tasks([base] + wheels, lambda: coll_avoid_demo())
 
 class goto:
     def __init__(self, task, tgt, time):
@@ -481,32 +293,14 @@ class coll_avoid_demo(sequence):
         states.append(lambda T=comstart: goto(com, T, 3.0))
         states.append(lambda: wait_converged(lambda: True))
 
-        
+        sequence.__init__(self, states, lambda: wait_time(3.0, lambda: mission_complete()))
 
 
-
-
-        sequence.__init__(self, states, lambda: wait_time(3.0, lambda: home()))
-
-
-class home:
+class mission_complete:
+    def __init__(self):
+        done = True 
     def __call__(self):
-        global ci
-        ci = ci_car_frame
-        ci.reset(time) 
-        ci.update(time, dt)
-
-        wh_pos = all_wheels(np.array([0.35, 0.35]))
-
-        for ref, w in zip(wh_pos, wheels):
-            T, _, _ = w.getPoseReference()
-            T.translation[:2] = ref 
-            w.setPoseTarget(T, 6.0)
-
-        global done
-        done = True
-
-        return wait_tasks(wheels, lambda: noop())
+        return None
 
 
 class wait_tasks:
