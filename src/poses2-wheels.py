@@ -3,8 +3,6 @@
 import numpy as np
 import rospy
 import rospkg
-import scipy.io 
-import yaml
 from os.path import join, dirname, abspath
 import os 
 import argparse
@@ -43,9 +41,9 @@ def get_ikpb_basic():
 
 def get_car_model_urdf_srdf():
     rospack = rospkg.RosPack()
-    centauro_path = join(rospack.get_path('centauro_cartesio'), 'configs')
-    paths = [join(centauro_path, xml, 'centauro_car.' + xml) for xml in ['urdf', 'srdf']] 
-    return (open(p, 'r').read() for p in paths) 
+    urdf_path = join(rospack.get_path('centauro_urdf'), 'urdf', 'centauro_virtual_frame.urdf')
+    srdf_path = join(rospack.get_path('centauro_srdf'), 'srdf', 'centauro_virtual_frame.srdf')
+    return (open(p, 'r').read() for p in (urdf_path, srdf_path)) 
     
 def update_ik(ci, model, time, dt):
     ci.update(time, dt)
@@ -128,6 +126,7 @@ hands = [ci.getTask('arm{}_8'.format(i+1)) for i in range(2)]
 
 # define tasks
 time = 0.0
+do_ik = True
 done = False
 
 # shared data between states
@@ -286,7 +285,7 @@ class high_manip:
         wpv.append(pyci.WayPoint(T, 16.0))
 
         vf.setWayPoints(wpv)
-        return wait_tasks([vf] + hands, lambda: noop())
+        return wait_tasks([vf] + hands, lambda: home_joint_space())
 
 class restore_pose:
     def __call__(self):
@@ -449,23 +448,26 @@ class poses(sequence):
 
         states.append(lambda: fr_pos_rot)
 
-        sequence.__init__(self, states, lambda: wait_time(3.0, lambda: home()))
+        sequence.__init__(self, states, lambda: wait_time(3.0, lambda: home_joint_space()))
 
-class home:
+class home_joint_space:
+    def __init__(self):
+        global do_ik
+        do_ik = False
+        self.t = 0.0
+        self.tf = 2.0
+        self.q0 = model.getJointPosition()
+        self.qf = model.getRobotState('home')
+        self.qf[:6] = self.q0[:6]
+        
     def __call__(self):
-        global ci
-        ci = ci_car_frame
-        ci.reset(time) 
-        ci.update(time, dt)
-
-        wh_pos = all_wheels(np.array([0.35, 0.35]))
-
-        for ref, w in zip(wh_pos, wheels):
-            T, _, _ = w.getPoseReference()
-            T.translation[:2] = ref 
-            w.setPoseTarget(T, 6.0)
-
-        return wait_tasks(wheels, lambda: noop())
+        alpha = self.t/self.tf 
+        if alpha > 1.0:
+            return noop()
+        q = alpha*self.qf + (1-alpha)*self.q0
+        model.setJointPosition(q)   
+        model.update()
+        self.t += dt     
 
 
 class wait_tasks:
@@ -495,7 +497,10 @@ while not done and not rospy.is_shutdown():
     next_state = state()
 
     # run ik
-    update_ik(ci, model, time, dt)
+    if do_ik: 
+        update_ik(ci, model, time, dt)
+    
+    # tf publish
     rspub.publishTransforms('poses2')
 
     # send model state as reference

@@ -4,10 +4,10 @@
     <arg name="prefix" default=""/>
     
     <param name="model_description/robot_description" 
-        textfile="$(find centauro_cartesio)/configs/urdf/centauro_car.urdf"/>
+        textfile="$(find centauro_urdf)/urdf/centauro_virtual_frame.urdf"/>
     
     <param name="model_description/robot_description_semantic"
-        textfile="$(find centauro_cartesio)/configs/srdf/centauro_car.srdf"/>
+        textfile="$(find centauro_srdf)/srdf/centauro_virtual_frame.srdf"/>
         
     <param name="robot_description" 
         textfile="$(find centauro_urdf)/urdf/centauro.urdf"/>
