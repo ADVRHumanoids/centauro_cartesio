@@ -2,9 +2,7 @@ solver_options:
     regularization: 1e-3
 
 stack:
-    - [Wheel_FL, Wheel_FR, Wheel_HR, Wheel_HL, Com]
-    - [Waist]
-    - [Postural]
+    - [Wheel_FL, Wheel_FR, Wheel_HR, Wheel_HL, Com, Waist, Postural]
 
 constraints: [JointLimits, VelocityLimits]
 
@@ -28,25 +26,38 @@ VelocityLimits:
         j_arm2_5: 0
         j_arm2_6: 0
         j_arm2_7: 0
+        j_wheel_1: 0
+        j_wheel_2: 0
+        j_wheel_3: 0
+        j_wheel_4: 0
         torso_yaw: 0.0
         neck_pitch: 0.0
+        neck_yaw: 0.0
         neck_velodyne: 0
 
 Wheel_FL:
     type: Cartesian
-    distal_link: wheel_1
+    lambda: 0.1
+    distal_link: contact_1
+    weight: [1, 1, 1, 0.1, 0.1, 0.01]
 
 Wheel_FR:
     type: Cartesian
-    distal_link: wheel_2
+    lambda: 0.1
+    distal_link: contact_2
+    weight: [1, 1, 1, 0.1, 0.1, 0.01]
 
 Wheel_HL:
     type: Cartesian
-    distal_link: wheel_3
+    lambda: 0.1
+    distal_link: contact_3
+    weight: [1, 1, 1, 0.1, 0.1, 0.01]
 
 Wheel_HR:
     type: Cartesian
-    distal_link: wheel_4
+    lambda: 0.1
+    distal_link: contact_4
+    weight: [1, 1, 1, 0.1, 0.1, 0.01]
 
 LeftArm:
     type: Cartesian
@@ -64,11 +75,13 @@ Waist:
     type: Cartesian
     distal_link: base_link
     indices: [3, 4, 5]
-    lambda: 0.05
+    lambda: 0.1
+    weight: 100
     
 Postural:
     type: Postural
     lambda: 0.01
+    weight: 0.001
     weight:
         VIRTUALJOINT_1: 0.0
         VIRTUALJOINT_2: 0.0
@@ -81,4 +94,5 @@ Postural:
 Com:
     type: Com
     lambda: 0.1
+    weight: 100
  

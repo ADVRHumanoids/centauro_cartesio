@@ -259,11 +259,12 @@ class coll_avoid_demo(sequence):
         states.append(lambda: wait_time(1.0, lambda: True))
         states.append(lambda T=rstart: goto(rhand, T, 8.0))
 
-        T = rstart.copy()
-        T.translation[0] -= 1.5
-        states.append(lambda T=T: goto(rhand, T, 6.0))
-        states.append(lambda: wait_time(1.0, lambda: True))
-        states.append(lambda T=rstart: goto(rhand, T, 8.0))
+        # note: remove until new collision model is validated
+        # T = rstart.copy()
+        # T.translation[0] -= 1.5
+        # states.append(lambda T=T: goto(rhand, T, 6.0))
+        # states.append(lambda: wait_time(1.0, lambda: True))
+        # states.append(lambda T=rstart: goto(rhand, T, 8.0))
 
         # com left-right
         states.append(lambda: wait_converged(lambda: True))

@@ -190,3 +190,13 @@ JointLimits:
 
 VelocityLimits:
     type: VelocityLimits
+
+Collision:
+    type: CollisionConstraint 
+    lib_name: libcartesio_collision_support.so
+    bound_scaling: 0.1  
+    max_pairs: 30  
+    distance_threshold: 0.01  
+    collision_urdf_path: $(rospack find centauro_urdf)/urdf/capsule/centauro_capsules.urdf
+    collision_srdf_path: $(rospack find centauro_srdf)/srdf/capsule/centauro_capsules.srdf
+
