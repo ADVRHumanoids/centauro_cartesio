@@ -5,16 +5,16 @@ import time
 import rospy
 from std_msgs.msg import Float64
 import rospkg
-import scipy.io 
+import scipy.io
 import yaml
 from os.path import join, dirname, abspath
-import os 
+import os
 import argparse
 from math import cos, sin, trunc
 
 os.environ['XBOT_VERBOSE'] = '2'
-from xbot_interface import xbot_interface as xbi 
-from xbot_interface import config_options as co 
+from xbot_interface import xbot_interface as xbi
+from xbot_interface import config_options as co
 from cartesian_interface.pyci_all import *
 
 # some utility functions
@@ -31,14 +31,14 @@ def get_car_model_urdf_srdf():
     rospack = rospkg.RosPack()
     centauro_urdf_path = join(rospack.get_path('centauro_urdf'), 'urdf/centauro_virtual_frame.urdf')
     centauro_srdf_path = join(rospack.get_path('centauro_srdf'), 'srdf/centauro_virtual_frame.srdf')
-    paths = [centauro_urdf_path, centauro_srdf_path] 
-    return (open(p, 'r').read() for p in paths) 
-    
+    paths = [centauro_urdf_path, centauro_srdf_path]
+    return (open(p, 'r').read() for p in paths)
+
 def update_ik(ci, model, time, dt):
     ci.update(time, dt)
     q = model.getJointPosition()
     qdot = model.getJointVelocity()
-    q += qdot * dt 
+    q += qdot * dt
     model.setJointPosition(q)
     model.update()
     return q, qdot
@@ -70,8 +70,8 @@ model_cfg = get_xbot_cfg(*get_car_model_urdf_srdf())
 model = xbi.ModelInterface(model_cfg)
 
 # get robot from standard urdf
-ctrl_cfg = get_xbot_cfg(rospy.get_param('/xbotcore/robot_description'), 
-                        rospy.get_param('/xbotcore/robot_description_semantic')) 
+ctrl_cfg = get_xbot_cfg(rospy.get_param('/xbotcore/robot_description'),
+                        rospy.get_param('/xbotcore/robot_description_semantic'))
 robot = xbi.RobotInterface(ctrl_cfg)
 robot.sense()
 
@@ -124,6 +124,8 @@ car_vel_ref_x = rospy.Publisher('car_vel_ref_x', Float64, queue_size=10)
 car_vel_ref_teta = rospy.Publisher('car_vel_ref_teta', Float64, queue_size=10)
 
 car = ci.getTask('car_frame')
+pelvis = ci.getTask('pelvis')
+
 
 print('started looping..')
 rate = rospy.Rate(1./dt * 1.0)
@@ -141,12 +143,19 @@ while not rospy.is_shutdown():
     pub_cart_error_x.publish(cart_error_x)
     pub_cart_error_y.publish(cart_error_y)
 
-    k = 3
-    max_vel_x = 0.25
-    max_vel_teta = 0.2
+    k = 4
+    max_vel_x = 0.4
+    max_vel_teta = 0.3
+    max_pelvis_y = 0.05
+    k_pelvis = max_pelvis_y/max_vel_teta
 
     car_vel_ref[0:3] = -(k * cart_error_x) * T_car_frame.linear[:,0]
     car_vel_ref[5] = -(k * cart_error_y)
+
+    pelvis_y = car_vel_ref[5]*k_pelvis
+    pelvis_ref = pelvis.getPoseReference()[0]
+    pelvis_ref.translation[1] = pelvis_y
+    pelvis.setPoseReference(pelvis_ref)
 
     # saturation
     if abs(car_vel_ref[0]) > max_vel_x:
@@ -176,4 +185,4 @@ while not rospy.is_shutdown():
     # sleep
     rate.sleep()
     time_t += dt
-    
+
