@@ -42,8 +42,8 @@ Collision:
     bound_scaling: 0.1
     distance_threshold: 0.01
     max_pairs: 30
-    collision_urdf_path: $(rospack find centauro_urdf)/urdf/capsule/centauro_capsules.urdf
-    collision_srdf_path: $(rospack find centauro_srdf)/srdf/capsule/centauro_capsules.srdf
+    collision_urdf_path: $(rospack find centauro_urdf)/urdf/centauro_capsule.urdf
+    collision_srdf_path: $(rospack find centauro_srdf)/srdf/centauro_capsule.srdf
     # pairs:
     #  - [ball1, ball2]
     #  - [wheel_1, wheel_2]

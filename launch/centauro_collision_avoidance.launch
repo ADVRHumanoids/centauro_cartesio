@@ -1,0 +1,33 @@
+<launch>
+
+    <arg name="rate" default="100.0"/>
+    <arg name="tf_prefix" default="ci"/>
+    <arg name="ik" default="$(find centauro_cartesio)/configs/collision_avoidance_stack.yaml"/>
+    <arg name="ns" default="/"/>
+    
+    <group ns="$(arg ns)">
+
+        <param name="robot_description" 
+            textfile="$(find centauro_urdf)/urdf/centauro.urdf"/>
+        
+        <param name="robot_description_semantic"
+            textfile="$(find centauro_srdf)/srdf/centauro.srdf"/>
+        
+        <param name="cartesian/problem_description" 
+            textfile="$(arg ik)"/>
+        
+        <param name="cartesian/joint_blacklist" type="yaml" 
+            value="[neck_velodyne]"/>
+            
+        <param name="cartesian/velocity_whitelist" type="yaml" 
+            value="[j_wheel_1, j_wheel_2, j_wheel_3, j_wheel_4]"/>
+
+        
+        <include file="$(find cartesian_interface)/launch/cartesio.launch">
+            <arg name="rate" value="$(arg rate)"/>
+            <arg name="tf_prefix" value="$(arg tf_prefix)"/>
+        </include>
+
+    </group>
+    
+</launch>
