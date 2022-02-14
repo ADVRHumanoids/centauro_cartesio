@@ -19,7 +19,7 @@
         textfile="$(find centauro_cartesio)/configs/centauro_car_model_stack.yaml"/>
     
     <param name="cartesian/joint_blacklist" type="yaml" 
-        value="[neck_velodyne]"/>
+        value="[velodyne_joint]"/>
         
     <param name="cartesian/velocity_whitelist" type="yaml" 
         value="[j_wheel_1, j_wheel_2, j_wheel_3, j_wheel_4]"/>
@@ -29,5 +29,7 @@
         <arg name="rate" value="$(arg rate)"/>
         <arg name="prefix" value="$(arg prefix)"/>
     </include>
+
+    <node pkg="cartesian_interface" type="joystick_spawner" name="joy_centauro"/>
     
 </launch>

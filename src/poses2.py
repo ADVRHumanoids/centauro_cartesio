@@ -3,16 +3,16 @@
 import numpy as np
 import rospy
 import rospkg
-import scipy.io 
+import scipy.io
 import yaml
 from os.path import join, dirname, abspath
-import os 
+import os
 import argparse
 from math import cos, sin, trunc
 
 os.environ['XBOT_VERBOSE'] = '2'
-from xbot_interface import xbot_interface as xbi 
-from xbot_interface import config_options as co 
+from xbot_interface import xbot_interface as xbi
+from xbot_interface import config_options as co
 from cartesian_interface.pyci_all import *
 
 parser = argparse.ArgumentParser(description='Scripted demo showcasing Centauro\'s ik')
@@ -20,7 +20,7 @@ parser.add_argument('--visual', '-v', required=False, action='store_true', help=
 parser.add_argument('--rate', '-r', required=False, type=float, help='If visual mode is set, play back motion at X times normal speed')
 args = parser.parse_args()
 
-if args.rate is not None and not args.visual:
+if args.rate is not None and not args.visual and args.rate > 1:
     print('--rate option requires --visual')
     exit(1)
 
@@ -37,21 +37,21 @@ def get_ikpb_car_model():
         return f.read()
 
 def get_ikpb_basic():
-    ikpath = join(dirname(abspath(__file__)), 'poses2_collision_avoidance_stack.yaml')
+    ikpath = join(dirname(abspath(__file__)), '..', 'configs', 'collision_avoidance_stack.yaml')
     with open(ikpath, 'r') as f:
         return f.read()
 
 def get_car_model_urdf_srdf():
     rospack = rospkg.RosPack()
     centauro_path = join(rospack.get_path('centauro_cartesio'), 'configs')
-    paths = [join(centauro_path, xml, 'centauro_car.' + xml) for xml in ['urdf', 'srdf']] 
-    return (open(p, 'r').read() for p in paths) 
-    
+    paths = [join(centauro_path, xml, 'centauro_car.' + xml) for xml in ['urdf', 'srdf']]
+    return (open(p, 'r').read() for p in paths)
+
 def update_ik(ci, model, time, dt):
     ci.update(time, dt)
     q = model.getJointPosition()
     qdot = model.getJointVelocity()
-    q += qdot * dt 
+    q += qdot * dt
     model.setJointPosition(q)
     model.update()
     return q, qdot
@@ -68,7 +68,7 @@ def get_xbot_cfg(urdf, srdf):
 
 def all_wheels(fl):
     signs = map(np.array, ([1, 1], [1, -1], [-1, 1], [-1, -1]))
-    fl_mul = lambda sign: fl*sign 
+    fl_mul = lambda sign: fl*sign
     return map(fl_mul, signs)
 
 def quintic(alpha):
@@ -84,13 +84,13 @@ def quintic(alpha):
 rospy.init_node('poses2')
 
 # get augmented kinematic model for ik
-model_cfg = get_xbot_cfg(rospy.get_param('/xbotcore/robot_description'), 
-                        rospy.get_param('/xbotcore/robot_description_semantic')) 
+model_cfg = get_xbot_cfg(rospy.get_param('/xbotcore/robot_description'),
+                        rospy.get_param('/xbotcore/robot_description_semantic'))
 model = xbi.ModelInterface(model_cfg)
 
 # get robot from standard urdf
-ctrl_cfg = get_xbot_cfg(rospy.get_param('/xbotcore/robot_description'), 
-                        rospy.get_param('/xbotcore/robot_description_semantic')) 
+ctrl_cfg = get_xbot_cfg(rospy.get_param('/xbotcore/robot_description'),
+                        rospy.get_param('/xbotcore/robot_description_semantic'))
 robot = xbi.RobotInterface(ctrl_cfg)
 robot.sense()
 
@@ -140,7 +140,7 @@ class goto:
 
         if not isinstance(task, list):
             task = [task]
-        
+
         if not isinstance(tgt, list):
             tgt = [tgt]
 
@@ -237,7 +237,7 @@ class coll_avoid_demo(sequence):
         states.append(lambda T=T: goto(rhand, T, 6.0))
         states.append(lambda: wait_time(1.0, lambda: True))
         states.append(lambda T=rstart: goto(rhand, T, 6.0))
-        
+
         states.append(lambda: wait_converged(lambda: True))
 
         # extreme right hand motions
@@ -259,6 +259,7 @@ class coll_avoid_demo(sequence):
         states.append(lambda: wait_time(1.0, lambda: True))
         states.append(lambda T=rstart: goto(rhand, T, 8.0))
 
+        # note: tested after collision model update
         T = rstart.copy()
         T.translation[0] -= 1.5
         states.append(lambda T=T: goto(rhand, T, 6.0))
@@ -298,7 +299,7 @@ class coll_avoid_demo(sequence):
 
 class mission_complete:
     def __init__(self):
-        done = True 
+        done = True
     def __call__(self):
         return None
 
@@ -307,7 +308,7 @@ class wait_tasks:
        def __init__(self, tasks, next_state):
            self.tasks = tasks
            self.next_state = next_state
-       
+
        def __call__(self):
             if all([t.getTaskState() == pyci.State.Online for t in self.tasks]):
                 return self.next_state()
@@ -357,4 +358,4 @@ while not done and not rospy.is_shutdown():
     # sleep
     rate.sleep()
     time += dt
-    
+
