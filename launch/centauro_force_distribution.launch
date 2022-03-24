@@ -12,8 +12,12 @@
 
     <node pkg="cartesio_acceleration_support" type="force_optimization_node" name="fopt">
         <param name="problem_description" textfile="$(arg fopt)"/>
-        <param name="tf_prefix" value="ci"/>
         <remap from="force_opt/joint_states" to="cartesian/solution"/>
+        <param name="tf_prefix" value="fopt"/>
+        <param name="publish_tf" value="true"/>
     </node>
+
+    <node pkg="tf" type="static_transform_publisher" name="fopt_to_ci"
+        args="0 0 0  0 0 0  ci/world fopt/world  10"/>
     
 </launch>
