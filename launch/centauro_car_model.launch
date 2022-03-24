@@ -2,6 +2,7 @@
 
     <arg name="rate" default="100.0"/>
     <arg name="prefix" default=""/>
+    <arg name="gui" default="false"/>
     
     <param name="model_description/robot_description" 
         textfile="$(find centauro_urdf)/urdf/centauro_virtual_frame.urdf"/>
@@ -31,5 +32,9 @@
     </include>
 
     <node pkg="cartesian_interface" type="joystick_spawner" name="joy_centauro"/>
+
+    <node if="$(arg gui)" 
+            pkg="rviz" type="rviz" name="rviz_centauro" 
+            args="-d $(find centauro_cartesio)/configs/rviz/centauro_wheeled.rviz"/>
     
 </launch>

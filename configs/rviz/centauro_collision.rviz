@@ -217,7 +217,6 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
         ankle1_1:
           Alpha: 1
           Show Axes: false
@@ -514,21 +513,12 @@ Visualization Manager:
     - Class: rviz/InteractiveMarkers
       Enable Transparency: true
       Enabled: true
-      Name: VirtualFrame
-      Show Axes: false
-      Show Descriptions: true
-      Show Visual Aids: false
-      Update Topic: /car_frame_cartesian_marker_server/update
-      Value: true
-    - Class: rviz/InteractiveMarkers
-      Enable Transparency: true
-      Enabled: false
       Name: LeftHand
       Show Axes: false
       Show Descriptions: true
       Show Visual Aids: false
       Update Topic: /arm1_8_cartesian_marker_server/update
-      Value: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -572,10 +562,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.2803986370563507
+      Pitch: 0.3603985905647278
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 5.613570213317871
+      Yaw: 5.658567428588867
     Saved: ~
 Window Geometry:
   Displays:

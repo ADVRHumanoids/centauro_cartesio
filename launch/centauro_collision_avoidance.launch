@@ -4,6 +4,7 @@
     <arg name="tf_prefix" default="ci"/>
     <arg name="ik" default="$(find centauro_cartesio)/configs/collision_avoidance_stack.yaml"/>
     <arg name="ns" default="/"/>
+    <arg name="gui" default="false"/>
     
     <group ns="$(arg ns)">
 
@@ -12,6 +13,12 @@
         
         <param name="robot_description_semantic"
             textfile="$(find centauro_srdf)/srdf/centauro.srdf"/>
+
+        <param name="robot_description_capsule" 
+            textfile="$(find centauro_urdf)/urdf/centauro_capsule.urdf"/>
+        
+        <param name="robot_description_semantic_capsule"
+            textfile="$(find centauro_srdf)/srdf/centauro_capsule.srdf"/>
         
         <param name="cartesian/problem_description" 
             textfile="$(arg ik)"/>
@@ -27,6 +34,10 @@
             <arg name="rate" value="$(arg rate)"/>
             <arg name="tf_prefix" value="$(arg tf_prefix)"/>
         </include>
+
+        <node if="$(arg gui)" 
+            pkg="rviz" type="rviz" name="rviz_centauro" 
+            args="-d $(find centauro_cartesio)/configs/rviz/centauro_collision.rviz"/>
 
     </group>
     
