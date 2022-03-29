@@ -3,6 +3,7 @@
     <arg name="rate" default="100.0"/>
     <arg name="prefix" default=""/>
     <arg name="ik" default="$(find centauro_cartesio)/configs/centauro_acceleration.yaml"/>
+    <arg name="gui" default="true"/>
     
     <param name="robot_description" 
         textfile="$(find centauro_urdf)/urdf/centauro.urdf"/>
@@ -24,5 +25,9 @@
         <arg name="rate" value="$(arg rate)"/>
         <arg name="prefix" value="$(arg prefix)"/>
     </include>
+
+    <node if="$(arg gui)"
+            pkg="rviz" type="rviz" name="rviz_centauro"
+            args="-d $(find centauro_cartesio)/configs/rviz/centauro_force.rviz"/>
     
 </launch>

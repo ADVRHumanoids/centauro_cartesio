@@ -101,4 +101,4 @@ underactuation:
     lib_name: libcartesio_acceleration_support.so
     type: DynamicFeasibility
     contacts: [contact_1, contact_2, contact_3, contact_4]
-    dynamics: false
+    dynamics: false  # no acceleration here!
