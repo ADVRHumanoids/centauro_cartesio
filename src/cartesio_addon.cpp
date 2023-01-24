@@ -17,7 +17,7 @@ struct CentauroSteeringTask : public TaskDescriptionImpl
     double max_steering_speed;
     Eigen::Vector3d contact_plane_normal;
     std::vector<double> hyst_comp;
-    std::vector<double> dz_th;
+    double dz_th;
     
     CentauroSteeringTask(YAML::Node task_node,
                          Context::ConstPtr ctx);
@@ -66,14 +66,11 @@ CentauroSteeringTask::CentauroSteeringTask(YAML::Node task_node,
     }
     if(task_node["deadzone"])
     {
-        auto deadzone = task_node["deadzone"].as<std::vector<double>>();
-
-        if(deadzone.size() != 2)
-        {
-            throw std::runtime_error("deadzone size() must be 2");
-        }
-
-        dz_th = deadzone;
+        dz_th = task_node["deadzone"].as<double>();
+    }
+    else
+    {
+        dz_th = 0.01;
     }
 }
 
@@ -101,9 +98,9 @@ public:
                 (_ci_steering->wheel_name,
                  _model,
                  _ctx->params()->getControlPeriod(),
+                 _ci_steering->dz_th,
                  _ci_steering->max_steering_speed,
-                 _ci_steering->hyst_comp,
-                 _ci_steering->dz_th
+                 _ci_steering->hyst_comp
                  );
 
         return _sot_steering;
