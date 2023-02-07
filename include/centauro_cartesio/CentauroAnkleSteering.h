@@ -1,9 +1,9 @@
-#ifndef __OPENSOT_CENTAURO_ANKLE_STEERING_H__
-#define __OPENSOT_CENTAURO_ANKLE_STEERING_H__
+#ifndef __CENTAURO_ANKLE_STEERING_H__
+#define __CENTAURO_ANKLE_STEERING_H__
 
 #include <OpenSoT/tasks/velocity/Postural.h>
 
-namespace OpenSoT { namespace tasks { namespace velocity {
+namespace XBot { namespace Cartesian { namespace Centauro {
     
     class HysteresisComparator
     {
@@ -94,7 +94,7 @@ namespace OpenSoT { namespace tasks { namespace velocity {
         
     };
     
-    class CentauroAnkleSteering : public Task<Eigen::MatrixXd, Eigen::VectorXd>
+    class CentauroAnkleSteering : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>
     {
       
     public:

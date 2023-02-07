@@ -1,6 +1,6 @@
 #include <centauro_cartesio/CentauroAnkleSteering.h>
 
-using namespace OpenSoT::tasks::velocity;
+using namespace XBot::Cartesian::Centauro;
 
 SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model, 
                                std::string wheel_name,
@@ -92,7 +92,7 @@ SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model,
     _model->getFloatingBaseLink(_waist_name);
 }
 
-void OpenSoT::tasks::velocity::SimpleSteering::setOutwardNormal(const Eigen::Vector3d& n)
+void SimpleSteering::setOutwardNormal(const Eigen::Vector3d& n)
 {
     Eigen::Vector3d e1(1., 0., 0.);
     Eigen::Vector3d e2(0., 1., 0.);
@@ -362,7 +362,7 @@ CentauroAnkleSteering::CentauroAnkleSteering(std::string wheel_name,
     _A(0, _steering_dof_idx) = 1.0;
 }
 
-void OpenSoT::tasks::velocity::CentauroAnkleSteering::setOutwardNormal(const Eigen::Vector3d& n)
+void CentauroAnkleSteering::setOutwardNormal(const Eigen::Vector3d& n)
 {
     _steering.setOutwardNormal(n);
 }
@@ -391,7 +391,7 @@ void CentauroAnkleSteering::_update(const Eigen::VectorXd& x)
     
 }
 
-void OpenSoT::tasks::velocity::CentauroAnkleSteering::_log(XBot::MatLogger2::Ptr logger)
+void CentauroAnkleSteering::_log(XBot::MatLogger2::Ptr logger)
 {
     _steering.log(logger);
 }
