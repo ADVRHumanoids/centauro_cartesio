@@ -1,12 +1,13 @@
 #include <cartesian_interface/sdk/problem/Task.h>
 #include <cartesian_interface/sdk/opensot/OpenSotTask.h>
-#include <OpenSoT/tasks/velocity/CentauroAnkleSteering.h>
+#include <centauro_cartesio/CentauroAnkleSteering.h>
 #include <OpenSoT/tasks/velocity/PureRolling.h>
 #include <boost/make_shared.hpp>
 
 #include <ros/ros.h>
 #include <centauro_cartesio/SetNormal.h>
 
+using namespace XBot::Cartesian::Centauro;
 using namespace XBot::Cartesian;
 
 struct CentauroSteeringTask : public TaskDescriptionImpl
@@ -94,7 +95,7 @@ public:
     
     TaskPtr constructTask() override
     {
-        _sot_steering = SotUtils::make_shared<OpenSoT::tasks::velocity::CentauroAnkleSteering>
+        _sot_steering = SotUtils::make_shared<CentauroAnkleSteering>
                 (_ci_steering->wheel_name,
                  _model,
                  _ctx->params()->getControlPeriod(),
@@ -109,7 +110,7 @@ public:
     
 private:
     
-    SotUtils::shared_ptr<OpenSoT::tasks::velocity::CentauroAnkleSteering> _sot_steering;
+    SotUtils::shared_ptr<CentauroAnkleSteering> _sot_steering;
     CentauroSteeringTask::Ptr _ci_steering;
     
 };

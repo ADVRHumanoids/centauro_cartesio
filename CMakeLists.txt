@@ -129,6 +129,7 @@ include_directories(
 # Declare a C++ library
 add_library(centauro_cartesio_addon
   src/cartesio_addon.cpp
+  src/CentauroAnkleSteering.cpp
 )
 
 add_dependencies(centauro_cartesio_addon ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
