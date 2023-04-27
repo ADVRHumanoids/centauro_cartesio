@@ -30,6 +30,9 @@ stack:
 
 constraints: [JointLimits, VelocityLimits, Collision]
 
+defaults:
+ - &wheel_radius 0.124  # 0.078
+
 JointLimits:
     type: JointLimits
 
@@ -78,28 +81,28 @@ Rolling_FL:
     type: WheelRolling
     wheel_name: wheel_1
     lib_name: libcentauro_cartesio_addon.so
-    wheel_radius: 0.078
+    wheel_radius: *wheel_radius
     weight: 1.0
 
 Rolling_FR:
     type: WheelRolling
     wheel_name: wheel_2
     lib_name: libcentauro_cartesio_addon.so
-    wheel_radius: 0.078
+    wheel_radius: *wheel_radius
     weight: 1.0
 
 Rolling_HL:
     type: WheelRolling
     wheel_name: wheel_3
     lib_name: libcentauro_cartesio_addon.so
-    wheel_radius: 0.078
+    wheel_radius: *wheel_radius
     weight: 1.0
 
 Rolling_HR:
     type: WheelRolling
     wheel_name: wheel_4
     lib_name: libcentauro_cartesio_addon.so
-    wheel_radius: 0.078
+    wheel_radius: *wheel_radius
     weight: 1.0
 
 Waist:

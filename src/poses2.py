@@ -108,7 +108,7 @@ model.update()
 contact_names = ('wheel_' + str(i+1) for i in range(4))
 floor_z = sum((model.getPose(c).translation[2] for c in contact_names)) / 4.0
 Tfb = model.getFloatingBasePose()
-Tfb.translation[2] -= floor_z
+Tfb.translation[2] -= floor_z 
 model.setFloatingBasePose(Tfb)
 model.update()
 
@@ -190,7 +190,7 @@ class coll_avoid_demo(sequence):
 
         # front polygon side
         wh_poses = [model.getPose('wheel_' + str(i+1)) for i in range(4)]
-        tgt_pos = (wh_poses[0].translation + wh_poses[1].translation)/2.0
+        tgt_pos = (wh_poses[0].translation + wh_poses[1].translation)/2.0 + 0.08  # note: to account for big wheels
         T = Affine3(pos=tgt_pos)
 
         # l start post
