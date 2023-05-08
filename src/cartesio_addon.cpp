@@ -1,6 +1,6 @@
 #include <cartesian_interface/sdk/problem/Task.h>
 #include <cartesian_interface/sdk/opensot/OpenSotTask.h>
-#include <centauro_cartesio/CentauroAnkleSteering.h>
+#include <centauro_cartesio/centauro_ankle_steering.h>
 #include <OpenSoT/tasks/velocity/PureRolling.h>
 #include <boost/make_shared.hpp>
 

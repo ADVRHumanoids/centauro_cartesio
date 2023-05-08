@@ -242,7 +242,7 @@ class coll_avoid_demo(sequence):
 
         # extreme right hand motions
         T = rstart.copy()
-        T.translation[0] += 1.0
+        T.translation[0] += 0.80
         states.append(lambda T=T: goto(rhand, T, 6.0))
         states.append(lambda: wait_time(1.0, lambda: True))
         states.append(lambda T=rstart: goto(rhand, T, 8.0))
@@ -340,6 +340,8 @@ while not done and not rospy.is_shutdown():
     # run ik
     update_ik(ci, model, time, dt)
     rspub.publishTransforms('poses2')
+
+    print(model.getCOM())
 
     # send model state as reference
     qref = model.getJointPositionMap()

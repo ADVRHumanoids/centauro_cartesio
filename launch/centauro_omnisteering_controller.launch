@@ -1,0 +1,10 @@
+<launch>
+
+<node pkg="centauro_cartesio" type="omnisteering_controller_node" name="centauro_omnisteering">
+    <param name="wheel_names" type="yaml" 
+        value="[wheel_1, wheel_2, wheel_3, wheel_4]"/>
+    <param name="wheel_radius" type="yaml" 
+        value="[0.124, 0.124, 0.124, 0.124]"/>
+</node>
+
+</launch>
