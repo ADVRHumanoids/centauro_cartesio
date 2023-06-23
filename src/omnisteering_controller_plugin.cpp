@@ -23,7 +23,9 @@ private:
     std::unique_ptr<RosSupport> _ros;
 
     SubscriberPtr<geometry_msgs::Twist> _cmd_vel_sub;
-    chrono::steady_clock::time_point _cmd_vel_timeout;
+    SubscriberPtr<Eigen::Vector6d> _cmd_vel_sub_V6;
+
+    chrono::steady_clock::time_point _cmd_vel_timeout, _cmd_vel_timeout_V6;
     std::chrono::nanoseconds _cmd_vel_ttl;
 };
 
@@ -40,6 +42,7 @@ bool OmnisteeringControllerPlugin::on_initialize()
 
     _cmd_vel_ttl = 200ms;
     getParam("cmd_vel_ttl", _cmd_vel_ttl);
+
 
     // create controller
     _osc = std::make_unique<Cartesian::OmniSteeringController>(
@@ -83,9 +86,18 @@ bool OmnisteeringControllerPlugin::on_initialize()
         _cmd_vel_timeout = chrono::steady_clock::now() + _cmd_vel_ttl;
     };
 
-    _cmd_vel_sub = _ros->subscribe<geometry_msgs::Twist>(
-                "cmd_vel", cmd_vel_cb, 1);
+    auto cmd_vel_cb_V6 = [this](const Eigen::Vector6d& vcmd)
+    {
+        _osc->setBaseVelocity(vcmd);
 
+        _cmd_vel_timeout = chrono::steady_clock::now() + _cmd_vel_ttl;
+    };
+
+    _cmd_vel_sub = _ros->subscribe<geometry_msgs::Twist>("cmd_vel", cmd_vel_cb, 1);
+    
+    _cmd_vel_sub_V6 = subscribe<Eigen::Vector6d>( "~cmd_vel_V6", cmd_vel_cb_V6, 1);
+    
+    
 
     return true;
 }
@@ -105,6 +117,7 @@ void OmnisteeringControllerPlugin::run()
 {
     // recv cmd vel
     _cmd_vel_sub->run();
+    _cmd_vel_sub_V6->run();
 
     // vel timeout
     if(_cmd_vel_timeout < chrono::steady_clock::now())
