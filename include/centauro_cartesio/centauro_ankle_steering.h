@@ -56,8 +56,10 @@ namespace XBot { namespace Cartesian { namespace Centauro {
         void setOutwardNormal(const Eigen::Vector3d& n);
 
         void setHysteresisComparisonThreshold(double th_lo, double th_hi);
-        
+
         const std::string& getWheelName() const { return _wheel_name; }
+
+        const std::string& getSteeringJointName() const { return _steering_joint->getJointName(); }
         
         void log(XBot::MatLogger2::Ptr logger);
         

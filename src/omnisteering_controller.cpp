@@ -66,17 +66,20 @@ std::vector<std::string> OmniSteeringController::getWheelJointNames() const
     return ret;
 }
 
-void OmniSteeringController::update()
+void OmniSteeringController::update(bool use_base_vel_from_model)
 {
-    Eigen::Affine3d w_T_base;
-    _model->getFloatingBasePose(w_T_base);
+    if(!use_base_vel_from_model)
+    {
+        Eigen::Affine3d w_T_base;
+        _model->getFloatingBasePose(w_T_base);
 
-    Eigen::Vector6d vbase;
-    vbase << w_T_base.linear() * _vlocal.head<3>(),
-             w_T_base.linear() * _vlocal.tail<3>();
+        Eigen::Vector6d vbase;
+        vbase << w_T_base.linear() * _vlocal.head<3>(),
+            w_T_base.linear() * _vlocal.tail<3>();
 
-    _model->setFloatingBaseTwist(vbase);
-    _model->update();
+        _model->setFloatingBaseTwist(vbase);
+        _model->update();
+    }
 
     for(auto& task : _rolling_tasks)
     {

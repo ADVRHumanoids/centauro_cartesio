@@ -24,7 +24,7 @@ public:
     std::vector<std::string> getWheelJointNames() const;
     std::vector<std::string> getSteeringJointNames() const;
 
-    void update();
+    void update(bool use_base_vel_from_model = false);
 
 private:
 
