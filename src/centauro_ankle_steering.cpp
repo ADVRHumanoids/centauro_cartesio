@@ -235,18 +235,23 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     des_q_2 = wrap_angle(des_q_2);
     
     double closest_q = std::fabs(des_q_1-q) < std::fabs(des_q_2-q) ? des_q_1 : des_q_2;
-    
+
+//    std::cout << _wheel_name << ": closest q =  " << closest_q << std::endl;
+
     /* Return value inside joint lims */
     if(_steering_joint->checkJointLimits(closest_q))
     {
+
         _prev_qdes = closest_q;
     }
     else if(_steering_joint->checkJointLimits(des_q_1))
     {
+//        std::cout << _wheel_name << ": FALLBACK q =  " << des_q_1 << std::endl;
         _prev_qdes = des_q_1;
     }
     else if(_steering_joint->checkJointLimits(des_q_2))
     {
+//        std::cout << _wheel_name << ": FALLBACK q =  " << des_q_2 << std::endl;
         _prev_qdes = des_q_2;
     }
     else{
@@ -349,8 +354,6 @@ CentauroAnkleSteering::CentauroAnkleSteering(std::string wheel_name,
     {
         throw std::runtime_error("steering joint not found for wheel " + wheel_name);
     }
-
-    std::cout << "found steering joint " << steering_joint->name << "\n";
 
     // re-define wheel parent
     _steering_joint = _model->getJointByName(steering_joint->name);
