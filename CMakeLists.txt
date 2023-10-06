@@ -13,11 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
     eigen_conversions
 )
 
-target_sources(_catkin_empty_exported_target
-  PRIVATE
-    python/CMakeLists.txt
-    python/simple_steering.cpp
-)
 
 find_package(OpenSoT REQUIRED)
 
