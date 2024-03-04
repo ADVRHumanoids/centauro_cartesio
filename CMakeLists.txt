@@ -18,6 +18,8 @@ find_package(OpenSoT REQUIRED)
 
 find_package(cartesian_interface REQUIRED)
 
+find_package(cartesio_acceleration_support QUIET)
+
 find_package(xbot2 QUIET)
 
 add_service_files(
@@ -104,6 +106,25 @@ if(${xbot2_FOUND})
         xbot2::xbot2_ros_support)
 
     install(TARGETS omnisteering_controller_plugin
+        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    )
+endif()
+
+if(${cartesio_acceleration_support_FOUND} AND ${xbot2_FOUND})
+
+    add_xbot2_plugin(centauro_gcomp_plugin
+        src/centauro_gcomp.cpp)
+
+    target_include_directories(centauro_gcomp_plugin PRIVATE
+        ${cartesio_acceleration_support_INCLUDE_DIRS}
+    )
+
+    target_link_libraries(centauro_gcomp_plugin
+        PRIVATE
+        cartesian_interface::CartesianInterface
+        xbot2::xbot2_ros_support)
+
+    install(TARGETS centauro_gcomp_plugin
         DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     )
 endif()
