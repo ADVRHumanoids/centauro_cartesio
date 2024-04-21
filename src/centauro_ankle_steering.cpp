@@ -20,15 +20,15 @@ SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model,
     _local_R_world.setIdentity();
     
     // locate wheel spinning axis
-    auto spinning_axis = _model->getUrdf().getLink(wheel_name)->parent_joint->axis;
+    auto spinning_axis = _model->getUrdf()->getLink(wheel_name)->parent_joint->axis;
     _wheel_spinning_axis << spinning_axis.x, spinning_axis.y, spinning_axis.z;
 
     // wheel parent link
-    _wheel_parent_name = _model->getUrdf().getLink(wheel_name)->parent_joint->parent_link_name;
+    _wheel_parent_name = _model->getUrdf()->getLink(wheel_name)->parent_joint->parent_link_name;
     
     // go up the tree until the steering axis is found
     urdf::JointConstSharedPtr steering_joint;
-    auto link = _model->getUrdf().getLink(_wheel_parent_name);
+    auto link = _model->getUrdf()->getLink(_wheel_parent_name);
     while(!steering_joint && link)
     {
         auto jnt = link->parent_joint;
@@ -40,7 +40,7 @@ SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model,
             break;
         }
 
-        link = _model->getUrdf().getLink(jnt->parent_link_name);
+        link = _model->getUrdf()->getLink(jnt->parent_link_name);
     }
 
     // steering joint not found
@@ -81,7 +81,7 @@ SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model,
 
     // save steering index and joint
     _steering_id = _model->getDofIndex(steering_joint->name);
-    _steering_joint = _model->getJointByName(steering_joint->name);
+    _steering_joint = _model->getJoint(steering_joint->name);
     
     // initialize previous steering angle
     Eigen::VectorXd q;
@@ -310,7 +310,7 @@ namespace
 {
     std::string get_parent(std::string link, XBot::ModelInterface::ConstPtr model)
     {
-        return model->getUrdf().getLink(link)->parent_joint->parent_link_name;
+        return model->getUrdf()->getLink(link)->parent_joint->parent_link_name;
     }
 }
 
@@ -330,11 +330,11 @@ CentauroAnkleSteering::CentauroAnkleSteering(std::string wheel_name,
     _W.setIdentity(1,1);
     
     // wheel parent link
-    auto wheel_parent_name = _model->getUrdf().getLink(wheel_name)->parent_joint->parent_link_name;
+    auto wheel_parent_name = _model->getUrdf()->getLink(wheel_name)->parent_joint->parent_link_name;
 
     // go up the tree until the steering axis is found
     urdf::JointConstSharedPtr steering_joint;
-    auto link = _model->getUrdf().getLink(wheel_parent_name);
+    auto link = _model->getUrdf()->getLink(wheel_parent_name);
     while(!steering_joint && link)
     {
         auto jnt = link->parent_joint;
@@ -346,7 +346,7 @@ CentauroAnkleSteering::CentauroAnkleSteering(std::string wheel_name,
             break;
         }
 
-        link = _model->getUrdf().getLink(jnt->parent_link_name);
+        link = _model->getUrdf()->getLink(jnt->parent_link_name);
     }
 
     // steering joint not found
@@ -356,7 +356,7 @@ CentauroAnkleSteering::CentauroAnkleSteering(std::string wheel_name,
     }
 
     // re-define wheel parent
-    _steering_joint = _model->getJointByName(steering_joint->name);
+    _steering_joint = _model->getJoint(steering_joint->name);
     
     _model->getJointPosition(_q);
     
@@ -371,7 +371,7 @@ void CentauroAnkleSteering::setOutwardNormal(const Eigen::Vector3d& n)
 }
 
 
-void CentauroAnkleSteering::_update(const Eigen::VectorXd& x)
+void CentauroAnkleSteering::_update()
 {
     // get robot state
     _model->getJointPosition(_q);

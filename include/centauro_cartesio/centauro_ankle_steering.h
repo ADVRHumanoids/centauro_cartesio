@@ -59,7 +59,7 @@ namespace XBot { namespace Cartesian { namespace Centauro {
 
         const std::string& getWheelName() const { return _wheel_name; }
 
-        const std::string& getSteeringJointName() const { return _steering_joint->getJointName(); }
+        const std::string& getSteeringJointName() const { return _steering_joint->getName(); }
         
         void log(XBot::MatLogger2::Ptr logger);
         
@@ -113,7 +113,7 @@ namespace XBot { namespace Cartesian { namespace Centauro {
         
         void setOutwardNormal(const Eigen::Vector3d& n);
         
-        void _update(const Eigen::VectorXd& x) override;
+        void _update() override;
         
         void _log(XBot::MatLogger2::Ptr logger) override;
         
