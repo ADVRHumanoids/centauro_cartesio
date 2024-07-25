@@ -319,12 +319,12 @@ CentauroAnkleSteering::CentauroAnkleSteering(std::string wheel_name,
                                              double dz_th,
                                              double max_steering_speed,
                                              std::vector<double> hyst_comp):
-    Task("centauro_steering_" + wheel_name, model->getJointNum()),
+    Task("centauro_steering_" + wheel_name, model->getNv()),
     _steering(model, wheel_name, hyst_comp, dz_th),
     _max_steering_dq(max_steering_speed*dt),
     _model(model)
 {
-    _A.setZero(1, model->getJointNum());
+    _A.setZero(1, model->getNv());
     _b.setZero(1);
     _W.setIdentity(1,1);
     

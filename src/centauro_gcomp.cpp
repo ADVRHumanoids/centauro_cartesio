@@ -67,7 +67,7 @@ bool XBot::CentauroGcomp::on_initialize()
         _force_tasks[c] = ct;
     }
 
-    _zero.setZero(_robot->getJointNum());
+    _zero.setZero(_robot->getNv());
 
     setDefaultControlMode(ControlMode::Effort());
 
