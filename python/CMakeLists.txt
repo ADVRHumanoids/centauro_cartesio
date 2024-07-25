@@ -1,8 +1,6 @@
 
 find_package(pybind11 REQUIRED)
 
-add_compile_options(-std=c++14)
-
 if(${pybind11_FOUND})
 
     message(STATUS "Will compile python bindings")
