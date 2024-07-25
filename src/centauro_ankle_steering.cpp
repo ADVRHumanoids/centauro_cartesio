@@ -85,7 +85,7 @@ SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model,
     
     // initialize previous steering angle
     Eigen::VectorXd q;
-    _model->getJointPosition(q);
+    _model->getJointPositionMinimal(q);
     _prev_qdes = q[_steering_id];
     
     // why do we need the base link name?
@@ -183,7 +183,7 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     _model->getPose(_wheel_parent_name, w_T_wp);
     
     /* Steering joint angle */
-    _model->getJointPosition(_q);
+    _model->getJointPositionMinimal(_q);
     double q = _q(_steering_id);
     
     /* Current angle between forward wheel direction and global x-axis */
@@ -241,7 +241,6 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     /* Return value inside joint lims */
     if(_steering_joint->checkJointLimits(closest_q))
     {
-
         _prev_qdes = closest_q;
     }
     else if(_steering_joint->checkJointLimits(des_q_1))
@@ -374,7 +373,7 @@ void CentauroAnkleSteering::setOutwardNormal(const Eigen::Vector3d& n)
 void CentauroAnkleSteering::_update()
 {
     // get robot state
-    _model->getJointPosition(_q);
+    _model->getJointPositionMinimal(_q);
 
     // compute wheel desired velocity
     Eigen::Vector6d wheel_vel;
