@@ -110,24 +110,24 @@ if(${xbot2_FOUND})
     )
 endif()
 
-if(${cartesio_acceleration_support_FOUND} AND ${xbot2_FOUND})
+#if(${cartesio_acceleration_support_FOUND} AND ${xbot2_FOUND})
 
-    add_xbot2_plugin(centauro_gcomp_plugin
-        src/centauro_gcomp.cpp)
+#    add_xbot2_plugin(centauro_gcomp_plugin
+#        src/centauro_gcomp.cpp)
 
-    target_include_directories(centauro_gcomp_plugin PRIVATE
-        ${cartesio_acceleration_support_INCLUDE_DIRS}
-    )
+#    target_include_directories(centauro_gcomp_plugin PRIVATE
+#        ${cartesio_acceleration_support_INCLUDE_DIRS}
+#    )
 
-    target_link_libraries(centauro_gcomp_plugin
-        PRIVATE
-        cartesian_interface::CartesianInterface
-        xbot2::xbot2_ros_support)
+#    target_link_libraries(centauro_gcomp_plugin
+#        PRIVATE
+#        cartesian_interface::CartesianInterface
+#        xbot2::xbot2_ros_support)
 
-    install(TARGETS centauro_gcomp_plugin
-        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    )
-endif()
+#    install(TARGETS centauro_gcomp_plugin
+#        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#    )
+#endif()
 
 
 ## Add cmake target dependencies of the library
