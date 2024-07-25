@@ -106,9 +106,9 @@ void OmnisteeringControllerPlugin::on_start()
 {
     _robot->sense();
 
-    JointNameMap qmap;
-    _robot->getPositionReference(qmap);
-    _model->setJointPosition(qmap);
+    Eigen::VectorXd qref;
+    _robot->getPositionReferenceFeedback(qref);
+    _model->setJointPosition(qref);
     _model->update();
 
 }

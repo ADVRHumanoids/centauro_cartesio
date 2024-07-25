@@ -1,8 +1,8 @@
 #include <centauro_cartesio/omnisteering_controller.h>
 
 #include <ros/ros.h>
-#include <RobotInterfaceROS/ConfigFromParam.h>
-#include <XBotInterface/RobotInterface.h>
+#include <xbot2_interface/ros/config_from_param.hpp>
+#include <xbot2_interface/robotinterface2.h>
 
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/TwistStamped.h>
@@ -33,14 +33,14 @@ int main(int argc, char **argv)
     ros::Duration cmd_vel_ttl(n.param("vel_cmd_timeout", 0.2));
 
     // create robot and model
-    auto cfg = XBot::ConfigOptionsFromParamServer(ros::NodeHandle("xbotcore"));
+    auto cfg = XBot::Utils::ConfigOptionsFromParamServer(ros::NodeHandle("xbotcore"));
     auto robot = XBot::RobotInterface::getRobot(cfg);
-    auto model = XBot::ModelInterface::getModel(cfg);
+    XBot::ModelInterface::Ptr model = XBot::ModelInterface::getModel(cfg);
 
     // sync model
-    XBot::JointNameMap qmap;
-    robot->getPositionReference(qmap);
-    model->setJointPosition(qmap);
+    Eigen::VectorXd qref;
+    robot->getPositionReferenceFeedback(qref);
+    model->setJointPosition(qref);
     model->update();
 
     // create controller
@@ -49,7 +49,8 @@ int main(int argc, char **argv)
                 wheel_names,
                 wheel_radius,
                 dt,
-                n.param("max_steering_speed", 1.0));
+                n.param("max_steering_speed", 1.0)
+        );
 
     // control mode handling
     auto wheel_joints = osc.getWheelJointNames();
@@ -67,7 +68,7 @@ int main(int argc, char **argv)
         ctrl_map[w] = XBot::ControlMode::Position();
     }
 
-    robot->setControlMode(XBot::ControlMode::Idle());
+    robot->setControlMode(XBot::ControlMode::None());
     robot->setControlMode(ctrl_map);
 
     // vref subscriber
@@ -108,7 +109,8 @@ int main(int argc, char **argv)
         osc.update();
 
         // send reference
-        robot->setReferenceFrom(*model);
+        robot->setPositionReference(model->getJointPosition());
+        robot->setVelocityReference(model->getJointVelocity());
         robot->move();
 
         // sync

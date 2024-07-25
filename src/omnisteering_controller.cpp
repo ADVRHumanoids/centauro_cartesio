@@ -25,7 +25,7 @@ OmniSteeringController::OmniSteeringController(ModelInterface::Ptr model,
                                      deadzone_threshold,
                                      max_steering_speed);
 
-        auto& urdf = _model->getUrdf();
+        auto& urdf = *_model->getUrdf();
         auto link = urdf.getLink(wheel_names[i]);
         int rid = _model->getDofIndex(link->parent_joint->name);
         int sid = rid - 1;
@@ -47,7 +47,7 @@ std::vector<std::string> OmniSteeringController::getSteeringJointNames() const
     for(int i = 0; i < _nc; i++)
     {
         int sid = _steering_id[i];
-        ret.push_back(_model->getEnabledJointNames()[sid]);
+        ret.push_back(_model->getVNames()[sid]);
     }
 
     return ret;
@@ -60,7 +60,7 @@ std::vector<std::string> OmniSteeringController::getWheelJointNames() const
     for(int i = 0; i < _nc; i++)
     {
         int rid = _rolling_id[i];
-        ret.push_back(_model->getEnabledJointNames()[rid]);
+        ret.push_back(_model->getVNames()[rid]);
     }
 
     return ret;
@@ -70,25 +70,18 @@ void OmniSteeringController::update(bool use_base_vel_from_model)
 {
     if(!use_base_vel_from_model)
     {
-        Eigen::Affine3d w_T_base;
-        _model->getFloatingBasePose(w_T_base);
-
-        Eigen::Vector6d vbase;
-        vbase << w_T_base.linear() * _vlocal.head<3>(),
-            w_T_base.linear() * _vlocal.tail<3>();
-
-        _model->setFloatingBaseTwist(vbase);
+        _model->setFloatingBaseTwist(_vlocal);
         _model->update();
     }
 
     for(auto& task : _rolling_tasks)
     {
-        task.update(_q);
+        task.update();
     }
 
     for(auto& task : _steering_tasks)
     {
-        task.update(_q);
+        task.update();
     }
 
     _model->getJointPosition(_q);
@@ -122,7 +115,7 @@ void OmniSteeringController::update(bool use_base_vel_from_model)
 
     }
 
-    _q += _qdot*_dt;
+    _q = _model->sum(_q, _qdot*_dt);
     _model->setJointPosition(_q);
     _model->setJointVelocity(_qdot);
     _model->update();
