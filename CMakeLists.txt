@@ -2,39 +2,37 @@ cmake_minimum_required(VERSION 3.10)
 project(centauro_cartesio VERSION 1.0.0)
 
 # Compile as C++11, supported in ROS Kinetic and newer
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-    message_generation
-    geometry_msgs
-    eigen_conversions
-)
-
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(builtin_interfaces REQUIRED)
 
 find_package(OpenSoT REQUIRED)
-
 find_package(cartesian_interface REQUIRED)
-
 find_package(cartesio_acceleration_support QUIET)
-
 find_package(xbot2 QUIET)
 
-add_service_files(
-    FILES
-    SetNormal.srv
+# Generate services in the 'srv' folder
+set(srv_files
+  srv/SetNormal.srv
 )
 
-generate_messages(
+rosidl_generate_interfaces(${PROJECT_NAME}
+    ${msg_files}
+    ${srv_files}
     DEPENDENCIES
-    geometry_msgs
+    builtin_interfaces
+    sensor_msgs
+    std_msgs
 )
 
-catkin_package(
+ament_export_dependencies(rosidl_default_runtime)
 
-)
+ament_package()
 
 ###########
 ## Build ##
@@ -54,18 +52,16 @@ add_library(centauro_cartesio_addon
     src/centauro_ankle_steering.cpp
 )
 
-add_dependencies(centauro_cartesio_addon ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 target_link_libraries(centauro_cartesio_addon
-    ${catkin_LIBRARIES}
     cartesian_interface::CartesianInterface
+    rclcpp::rclcpp
+    ${PROJECT_NAME}__rosidl_typesupport_cpp
 )
 
 install(TARGETS centauro_cartesio_addon
-    EXPORT ${PROJECT_NAME}Targets
-    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 
@@ -74,26 +70,25 @@ add_library(omnisteering_controller SHARED
     src/omnisteering_controller.cpp)
 
 target_link_libraries(omnisteering_controller
-    ${catkin_LIBRARIES}
     cartesian_interface::CartesianInterface
     centauro_cartesio_addon
 )
 
-# omnisteering_controller ndoe
-add_executable(omnisteering_controller_node
-    src/omnisteering_controller_node.cpp)
+# # omnisteering_controller ndoe
+# add_executable(omnisteering_controller_node
+#     src/omnisteering_controller_node.cpp)
 
-target_link_libraries(omnisteering_controller_node
-    omnisteering_controller
-)
+# target_link_libraries(omnisteering_controller_node
+#     omnisteering_controller
+# )
 
-install(TARGETS omnisteering_controller omnisteering_controller_node
-    EXPORT ${PROJECT_NAME}Targets
-    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# install(TARGETS omnisteering_controller omnisteering_controller_node
+#     EXPORT ${PROJECT_NAME}Targets
+#     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 
-)
+# )
 
 # omnisteering_controller plugin
 if(${xbot2_FOUND})
@@ -103,10 +98,10 @@ if(${xbot2_FOUND})
     target_link_libraries(omnisteering_controller_plugin
         PRIVATE
         omnisteering_controller
-        xbot2::xbot2_ros_support)
+        xbot2::xbot2_ros2_support)
 
     install(TARGETS omnisteering_controller_plugin
-        DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        DESTINATION lib
     )
 endif()
 
@@ -162,12 +157,6 @@ endif()
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-install(PROGRAMS
-    python/virtual_frame_test.py
-    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
 
 ## Mark executables and/or libraries for installation
 # install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
@@ -177,18 +166,18 @@ install(PROGRAMS
 # )
 
 # Mark cpp header files for installation
-install(DIRECTORY include/${PROJECT_NAME}/
-    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+install(DIRECTORY include/${PROJECT_NAME}
+    DESTINATION include
     FILES_MATCHING PATTERN "*.h"
     PATTERN ".svn" EXCLUDE
 )
 
-install(DIRECTORY configs/
-    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/configs
+install(DIRECTORY configs
+    DESTINATION share/${PROJECT_NAME}
 )
 
-install(DIRECTORY launch/
-    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+install(DIRECTORY launch
+    DESTINATION share/${PROJECT_NAME}
     FILES_MATCHING PATTERN "*.launch"
     PATTERN ".svn" EXCLUDE
 )
@@ -198,4 +187,4 @@ add_subdirectory(python)
 
 
 include(cmake/ExportProject.cmake)
-export_project()
+# export_project()

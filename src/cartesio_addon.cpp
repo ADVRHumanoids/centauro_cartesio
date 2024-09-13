@@ -4,8 +4,8 @@
 #include <OpenSoT/tasks/velocity/PureRolling.h>
 #include <boost/make_shared.hpp>
 
-#include <ros/ros.h>
-#include <centauro_cartesio/SetNormal.h>
+#include <rclcpp/rclcpp.hpp>
+#include <centauro_cartesio/srv/set_normal.hpp>
 
 using namespace XBot::Cartesian::Centauro;
 using namespace XBot::Cartesian;

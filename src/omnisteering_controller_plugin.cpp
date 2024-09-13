@@ -1,7 +1,7 @@
 #include <xbot2/xbot2.h>
-#include <xbot2/ros/ros_support.h>
+#include <xbot2/ros/ros2_support.h>
 #include <centauro_cartesio/omnisteering_controller.h>
-#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/msg/twist.hpp>
 
 namespace XBot {
 
@@ -20,9 +20,9 @@ private:
 
     ModelInterface::Ptr _model;
     std::unique_ptr<Cartesian::OmniSteeringController> _osc;
-    std::unique_ptr<RosSupport> _ros;
+    std::unique_ptr<Ros2Support> _ros;
 
-    SubscriberPtr<geometry_msgs::Twist> _cmd_vel_sub;
+    SubscriberPtr<geometry_msgs::msg::Twist> _cmd_vel_sub;
     SubscriberPtr<Eigen::Vector6d> _cmd_vel_sub_V6;
 
     chrono::steady_clock::time_point _cmd_vel_timeout, _cmd_vel_timeout_V6;
@@ -68,9 +68,9 @@ bool OmnisteeringControllerPlugin::on_initialize()
     setDefaultControlMode(ctrl_map);
 
     // ros
-    _ros = std::make_unique<RosSupport>(ros::NodeHandle(getName()));
+    _ros = std::make_unique<Ros2Support>(Ros2Support::get_main_node()->create_sub_node(getName()));
 
-    auto cmd_vel_cb = [this](const geometry_msgs::Twist& msg)
+    auto cmd_vel_cb = [this](const geometry_msgs::msg::Twist& msg)
     {
         Eigen::Vector6d vcmd;
         vcmd << msg.linear.x,
@@ -93,7 +93,7 @@ bool OmnisteeringControllerPlugin::on_initialize()
         _cmd_vel_timeout = chrono::steady_clock::now() + _cmd_vel_ttl;
     };
 
-    _cmd_vel_sub = _ros->subscribe<geometry_msgs::Twist>("cmd_vel", cmd_vel_cb, 1);
+    _cmd_vel_sub = _ros->subscribe<geometry_msgs::msg::Twist>("cmd_vel", cmd_vel_cb, 1);
     
     _cmd_vel_sub_V6 = subscribe<Eigen::Vector6d>( "~cmd_vel_V6", cmd_vel_cb_V6, 1);
     
