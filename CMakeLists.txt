@@ -54,6 +54,7 @@ add_library(centauro_cartesio_addon
 
 target_link_libraries(centauro_cartesio_addon
     cartesian_interface::CartesianInterface
+    cartesian_interface::CartesianInterfaceSolverOpenSot
     rclcpp::rclcpp
     ${PROJECT_NAME}__rosidl_typesupport_cpp
 )
@@ -73,6 +74,9 @@ target_link_libraries(omnisteering_controller
     cartesian_interface::CartesianInterface
     centauro_cartesio_addon
 )
+
+install(TARGETS omnisteering_controller
+    DESTINATION lib)
 
 # # omnisteering_controller ndoe
 # add_executable(omnisteering_controller_node
