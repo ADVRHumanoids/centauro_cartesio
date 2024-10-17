@@ -70,7 +70,7 @@ void OmniSteeringController::update(bool use_base_vel_from_model)
 {
     if(!use_base_vel_from_model)
     {
-        _model->setFloatingBaseTwist(_vlocal);
+        _model->setFloatingBaseTwist(_vlocal, true);
         _model->update();
     }
 
