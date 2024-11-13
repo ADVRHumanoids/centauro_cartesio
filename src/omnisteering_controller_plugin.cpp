@@ -104,7 +104,7 @@ bool OmnisteeringControllerPlugin::on_initialize()
 
 void OmnisteeringControllerPlugin::on_start()
 {
-    _robot->sense();
+    _robot->sense(true, true);
 
     JointNameMap qmap;
     _robot->getPositionReference(qmap);
