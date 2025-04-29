@@ -15,6 +15,12 @@ OmniSteeringController::OmniSteeringController(ModelInterface::Ptr model,
 
     for(int i = 0; i < _nc; i++)
     {
+        Eigen::Affine3d T_unused;
+        if(!model->getPose(wheel_names[i], T_unused))
+        {
+            throw std::runtime_error(wheel_names[i] + " does not exist");
+        }
+
         _rolling_tasks.emplace_back(wheel_names[i],
                                     wheel_radius[i],
                                     *_model);
