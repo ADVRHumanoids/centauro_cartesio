@@ -115,6 +115,8 @@ void OmnisteeringControllerPlugin::on_start()
     _robot->getPositionReference(qmap);
     _model->setJointPosition(qmap);
     _model->update();
+    
+    _osc->initWheelPosition();
 }
 
 void OmnisteeringControllerPlugin::run()

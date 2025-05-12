@@ -23,6 +23,8 @@ public:
 
     void setBaseVelocity(const Eigen::Vector6d& v);
 
+    void initWheelPosition();
+
     void setVelOffsetGain(double gain);
 
     std::vector<std::string> getWheelJointNames() const;
