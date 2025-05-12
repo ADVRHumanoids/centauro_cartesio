@@ -25,6 +25,8 @@ private:
     SubscriberPtr<geometry_msgs::Twist> _cmd_vel_sub;
     SubscriberPtr<Eigen::Vector6d> _cmd_vel_sub_V6;
 
+    double _vel_offset_gain;
+
     chrono::steady_clock::time_point _cmd_vel_timeout, _cmd_vel_timeout_V6;
     std::chrono::nanoseconds _cmd_vel_ttl;
 };
@@ -40,13 +42,16 @@ bool OmnisteeringControllerPlugin::on_initialize()
 
     double max_steering_speed = getParamOr("~max_steering_speed", 2.0);
 
+    _vel_offset_gain = 0;
+    createTunableParam("~vel_offset_gain", &_vel_offset_gain, Validators::InRange(0.0, 10.0));
+
     _cmd_vel_ttl = 200ms;
     getParam("cmd_vel_ttl", _cmd_vel_ttl);
 
 
     // create controller
     _osc = std::make_unique<Cartesian::OmniSteeringController>(
-                _model, wheel_names, wheel_radius, getPeriodSec(), max_steering_speed
+                _model, _robot, wheel_names, wheel_radius, getPeriodSec(), max_steering_speed
                 );
 
     // control mode handling
@@ -110,7 +115,6 @@ void OmnisteeringControllerPlugin::on_start()
     _robot->getPositionReference(qmap);
     _model->setJointPosition(qmap);
     _model->update();
-
 }
 
 void OmnisteeringControllerPlugin::run()
@@ -126,6 +130,7 @@ void OmnisteeringControllerPlugin::run()
     }
 
     // update controller
+    _osc->setVelOffsetGain(_vel_offset_gain);
     _osc->update();
 
     // send reference

@@ -46,6 +46,7 @@ int main(int argc, char **argv)
     // create controller
     XBot::Cartesian::OmniSteeringController osc(
                 model,
+                robot,
                 wheel_names,
                 wheel_radius,
                 dt,
