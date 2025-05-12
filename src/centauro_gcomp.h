@@ -20,9 +20,13 @@ public:
 
     void on_start() override;
 
+    void starting() override;
+
     void run() override;
 
     void on_stop() override;
+
+    void stopping() override;
 
 private:
 
@@ -38,7 +42,9 @@ private:
 
     std::unique_ptr<RosSupport> _ros;
 
-    Eigen::VectorXd _zero;
+    double _time, _alpha, _ramp_time;
+    Eigen::VectorXd _zero, _tau;
+    Eigen::VectorXd _tau_max;
 
 
 };

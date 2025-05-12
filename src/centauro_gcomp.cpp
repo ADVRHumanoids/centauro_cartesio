@@ -50,6 +50,8 @@ bool XBot::CentauroGcomp::on_initialize()
         w_stance = w_swing.setIdentity(ft->getSize(), ft->getSize());
         w_swing *= 1000;
 
+        ft->setWeight(w_stance);
+
         ct.sub = _ros->subscribe<std_msgs::Bool>(ft->getLinkName() + "/force/contact",
             [ft, w_stance, w_swing](const auto& m)
             {
@@ -68,23 +70,49 @@ bool XBot::CentauroGcomp::on_initialize()
     }
 
     _zero.setZero(_robot->getJointNum());
+    _tau.setZero(_model->getJointNum());
 
     setDefaultControlMode(ControlMode::Effort());
+
+    _ramp_time = getParamOr("~ramp_time", 2.0);
 
     return true;
 }
 
 void XBot::CentauroGcomp::on_start()
 {
+    _time = 0;
+}
+
+void XBot::CentauroGcomp::starting()
+{
+    if(_time > _ramp_time)
+    {
+        _alpha = 1.0;
+        start_completed();
+        return;
+    }
+    
+    _time += getPeriodSec();
+
+    _alpha = _time / _ramp_time;
+
+    run();
 }
 
 void XBot::CentauroGcomp::run()
 {
+
     // receive contact flags
     _queue.run();
 
     // sync model
+    _robot->sense();
     _model->syncFrom(*_robot, Sync::Position);
+
+    // Eigen::VectorXd q;
+    // _model->getJointPosition(q);
+    // jinfo("q = {}", q.transpose().format(2));
 
     // solve force opt problem
     if(!_ci->update(0, getPeriodSec()))
@@ -112,7 +140,20 @@ void XBot::CentauroGcomp::run()
 
         c.pub->publish(msg);
 
+        // jinfo("{} pos = {}", cname, c.task->getForceFrame().translation().transpose());
+        // jinfo("{} F = {}", cname, c.task->getForceValue().transpose());
+
     }
+
+    // Eigen::Vector3d com;
+    // _model->getCOM(com);
+    // jinfo("com = {}", com.transpose());
+
+    // interpolate torques
+    _model->getJointEffort(_tau);
+    _tau = _alpha * _tau;
+    _model->enforceEffortLimit(_tau);
+    _model->setJointEffort(_tau);
 
     // send torques
     _robot->setReferenceFrom(*_model, Sync::Effort);
@@ -121,8 +162,23 @@ void XBot::CentauroGcomp::run()
 
 void XBot::CentauroGcomp::on_stop()
 {
-    _robot->setEffortReference(_zero);
-    _robot->move();
+    _time = 0;
+}
+
+void XBot::CentauroGcomp::stopping()
+{
+    if(_time > _ramp_time)
+    {
+        _alpha = 0.0;
+        stop_completed();
+        return;
+    }
+    
+    _time += getPeriodSec();
+
+    _alpha = 1. - _time / _ramp_time;
+
+    run();
 }
 
 XBOT2_REGISTER_PLUGIN(CentauroGcomp, centauro_gcomp_plugin)
