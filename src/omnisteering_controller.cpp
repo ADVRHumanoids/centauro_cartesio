@@ -21,7 +21,7 @@ OmniSteeringController::OmniSteeringController(ModelInterface::Ptr model,
     for(int i = 0; i < _nc; i++)
     {
         Eigen::Affine3d T_unused;
-        if(!model->getPose(wheel_names[i], "base_link", _T_init[i]))
+        if(!model->getPose(wheel_names[i], "base_link", T_unused))
         {
             throw std::runtime_error(wheel_names[i] + " does not exist");
         }
@@ -43,6 +43,14 @@ OmniSteeringController::OmniSteeringController(ModelInterface::Ptr model,
 
         _rolling_id.push_back(rid);
         _steering_id.push_back(sid);
+    }
+}
+
+void OmniSteeringController::initWheelPosition()
+{
+    for(int i = 0; i < _nc; i++)
+    {
+        _model->getPose(_steering_tasks[i].getWheelName(), "base_link", _T_init[i]);
     }
 }
 
@@ -99,7 +107,6 @@ void OmniSteeringController::update(bool use_base_vel_from_model)
         _robot->model().getPose(_steering_tasks[i].getWheelName(), "base_link", T_wheel);
 
         Eigen::Vector3d err = _T_init[i].translation() - T_wheel.translation();
-
         Eigen::Vector3d vel_offset = Eigen::Vector3d(err(0), err(1), 0);
         _steering_tasks[i].setVelocityOffset(_vel_offset_gain * vel_offset);
     }
