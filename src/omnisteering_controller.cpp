@@ -1,22 +1,27 @@
 #include <centauro_cartesio/omnisteering_controller.h>
+#include <std_msgs/Float32.h>
 
 using namespace XBot::Cartesian;
 
 OmniSteeringController::OmniSteeringController(ModelInterface::Ptr model,
+                                               RobotInterface::Ptr robot,
                                                std::vector<std::string> wheel_names,
                                                std::vector<double> wheel_radius,
                                                double dt,
                                                double max_steering_speed):
     _model(model),
+    _robot(robot),
     _nc(wheel_names.size()),
     _dt(dt)
 {
     double deadzone_threshold = 0.01;
 
+    _T_init.resize(_nc);
+
     for(int i = 0; i < _nc; i++)
     {
         Eigen::Affine3d T_unused;
-        if(!model->getPose(wheel_names[i], T_unused))
+        if(!model->getPose(wheel_names[i], "base_link", _T_init[i]))
         {
             throw std::runtime_error(wheel_names[i] + " does not exist");
         }
@@ -72,6 +77,11 @@ std::vector<std::string> OmniSteeringController::getWheelJointNames() const
     return ret;
 }
 
+void OmniSteeringController::setVelOffsetGain(double gain)
+{
+    _vel_offset_gain = gain;
+}
+
 void OmniSteeringController::update(bool use_base_vel_from_model)
 {
     if(!use_base_vel_from_model)
@@ -79,6 +89,21 @@ void OmniSteeringController::update(bool use_base_vel_from_model)
         _model->setFloatingBaseTwist(_vlocal, true);
         _model->update();
     }
+
+
+    _robot->sense();
+
+    for(int i = 0; i < _nc; i++)
+    {
+        Eigen::Affine3d T_wheel;
+        _robot->model().getPose(_steering_tasks[i].getWheelName(), "base_link", T_wheel);
+
+        Eigen::Vector3d err = _T_init[i].translation() - T_wheel.translation();
+
+        Eigen::Vector3d vel_offset = Eigen::Vector3d(err(0), err(1), 0);
+        _steering_tasks[i].setVelocityOffset(_vel_offset_gain * vel_offset);
+    }
+
 
     for(auto& task : _rolling_tasks)
     {

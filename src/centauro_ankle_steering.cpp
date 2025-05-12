@@ -307,6 +307,7 @@ CentauroAnkleSteering::CentauroAnkleSteering(std::string wheel_name,
     Task("centauro_steering_" + wheel_name, model->getNv()),
     _steering(model, wheel_name, hyst_comp, dz_th),
     _max_steering_dq(max_steering_speed*dt),
+    _vel_offset(Eigen::Vector3d::Zero()),
     _model(model)
 {
     _A.setZero(1, model->getNv());
@@ -359,6 +360,15 @@ void CentauroAnkleSteering::setOutwardNormal(const Eigen::Vector3d& n)
     _steering.setOutwardNormal(n);
 }
 
+void CentauroAnkleSteering::setVelocityOffset(const Eigen::Vector3d v_off)
+{
+    _vel_offset = v_off;
+}
+
+const std::string& CentauroAnkleSteering::getWheelName() const
+{
+    return _steering.getWheelName();
+}
 
 void CentauroAnkleSteering::_update()
 {
@@ -374,8 +384,7 @@ void CentauroAnkleSteering::_update()
     Eigen::Vector6d wheel_vel;
     _model->getVelocityTwist(_steering.getWheelName(), wheel_vel);
 
-    // let the steering controller compute the angle
-    double q_steering = _steering.computeSteeringAngle(wheel_vel.head<3>());
+    double q_steering = _steering.computeSteeringAngle(wheel_vel.head<3>() + wheel_vel.head<3>().norm() * _vel_offset);
     double q_current = _q(_steering_dof_idx);
     
     // simple proportional controller to align steering q 

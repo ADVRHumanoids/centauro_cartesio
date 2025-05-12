@@ -114,8 +114,12 @@ namespace XBot { namespace Cartesian { namespace Centauro {
                               double max_steering_speed = DEFAULT_MAX_STEERING_SPEED,
                               std::vector<double> hyst_comp = {}
                              );
+
+        const std::string& getWheelName() const;
         
         void setOutwardNormal(const Eigen::Vector3d& n);
+
+        void setVelocityOffset(const Eigen::Vector3d v_off);
         
         void _update() override;
         
@@ -130,6 +134,8 @@ namespace XBot { namespace Cartesian { namespace Centauro {
         XBot::Joint::ConstPtr _steering_joint;
         Eigen::VectorXd _q;
         int _steering_dof_idx;
+
+        Eigen::Vector3d _vel_offset;
         
         double _max_steering_dq;
     };

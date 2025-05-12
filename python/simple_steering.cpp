@@ -28,11 +28,13 @@ PYBIND11_MODULE(simple_steering, m)
 
     py::class_<XBot::Cartesian::OmniSteeringController>(m, "OmniSteeringController")
         .def(py::init<XBot::ModelInterface::Ptr,
+                      XBot::RobotInterface::Ptr,
                       std::vector<std::string>,
                       std::vector<double>,
                       double,
                       double >(),
              py::arg("model"),
+             py::arg("robot"),
              py::arg("wheel_names"),
              py::arg("wheel_radius"),
              py::arg("dt"),

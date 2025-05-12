@@ -3,6 +3,7 @@
 
 #include "centauro_ankle_steering.h"
 #include <OpenSoT/tasks/velocity/PureRolling.h>
+#include <XBotInterface/RobotInterface.h>
 
 namespace XBot::Cartesian {
 
@@ -14,6 +15,7 @@ public:
     typedef Centauro::CentauroAnkleSteering SteeringTask;
 
     OmniSteeringController(ModelInterface::Ptr model,
+                           RobotInterface::Ptr robot,
                            std::vector<std::string> wheel_names,
                            std::vector<double> wheel_radius,
                            double dt,
@@ -21,22 +23,28 @@ public:
 
     void setBaseVelocity(const Eigen::Vector6d& v);
 
+    void setVelOffsetGain(double gain);
+
     std::vector<std::string> getWheelJointNames() const;
     std::vector<std::string> getSteeringJointNames() const;
 
     void update(bool use_base_vel_from_model = false);
 
 private:
-
     ModelInterface::Ptr _model;
+    RobotInterface::Ptr _robot;
     const int _nc;
     const double _dt;
     std::vector<RollingTask> _rolling_tasks;
     std::vector<SteeringTask> _steering_tasks;
     std::vector<int> _rolling_id, _steering_id;
 
+    std::vector<Eigen::Affine3d> _T_init;
+
     Eigen::Vector6d _vlocal;
     Eigen::VectorXd _q, _qdot;
+
+    double _vel_offset_gain;
 
 };
 
