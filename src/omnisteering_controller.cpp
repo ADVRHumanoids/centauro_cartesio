@@ -152,6 +152,8 @@ void OmniSteeringController::update(bool use_base_vel_from_model)
         // std::cout << "vr=" << _qdot[rid] << ", vs=" << _qdot[sid] << "\n\n";
 
     }
+    // neglect base motions
+    _qdot.head<6>(0).setZero();
 
     _q = _model->sum(_q, _qdot*_dt);
     _model->setJointPosition(_q);
