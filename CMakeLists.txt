@@ -96,7 +96,8 @@ install(TARGETS omnisteering_controller omnisteering_controller_node
 # omnisteering_controller plugin
 if(${xbot2_FOUND})
     add_xbot2_plugin(omnisteering_controller_plugin
-        src/omnisteering_controller_plugin.cpp)
+        src/omnisteering_controller_plugin.cpp
+        src/omnisteering_safety_sensor.cpp)
 
     target_link_libraries(omnisteering_controller_plugin
         PRIVATE

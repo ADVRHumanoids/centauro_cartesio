@@ -3,6 +3,7 @@
 
 #include "centauro_ankle_steering.h"
 #include <OpenSoT/tasks/velocity/PureRolling.h>
+#include <centauro_cartesio/omnisteering_safety_sensor.h>
 
 namespace XBot::Cartesian {
 
