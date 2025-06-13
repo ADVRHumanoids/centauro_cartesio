@@ -51,16 +51,16 @@ namespace tree {
 
   void Sonar::processData(const sensor_msgs::Range::ConstPtr& msg)
   {
-
     if (fabs(msg->range) < thresholds[0])
     {
       obstacleFlag = true;
-      currentDistance = msg->range;
+      
     }
     else 
     {
       obstacleFlag = false;
     }
+    currentDistance = msg->range;
   }
   
 
@@ -69,6 +69,44 @@ namespace tree {
   }
   
   bool Sonar::checkSafety(Eigen::Vector6d& referenceTwist)
+  {
+    if(!obstacleFlag) {return true;}  // or (referenceTwist.norm() <= 0.05)
+
+    // std::cout << "Cmd Vel: " << referenceTwist(0) << std::endl;
+    
+    Eigen::Vector3d linearVel = referenceTwist.head(3);
+    Eigen::Vector3d projectedVel = pose.linear() * linearVel;
+    Eigen::Vector3d sensorAxis(1, 0, 0);
+
+    // std::cout << "Sensor: " << sensorFrame << std::endl;
+    // std::cout << "Pose Linear: " << pose.linear() << std::endl;
+    // std::cout << "Projected: "<< projectedVel.x() << std::endl;
+    // std::cout << "Base: " << linearVel.x() << std::endl;
+
+    // std::cout << "Projected. X: "<< projectedVel.x() << ", Z:" << projectedVel.z() << std::endl;
+
+    if(projectedVel.x() > 0.0)
+      projectedVel.x() *= ((currentDistance - thresholds[1])/(thresholds[0] - thresholds[1]));
+    if(projectedVel.z() > 0.0)
+      projectedVel.z() *= ((currentDistance - thresholds[1])/(thresholds[0] - thresholds[1]));
+
+    // To be Checked
+    // if (currentDistance < thresholds[1])
+    // {
+    //   projectedVel.x() = 0.0;
+    //   projectedVel.z() = 0.0;
+    // }
+    // std::cout << "Projected scaled. X: "<< projectedVel.x() << ", Z:" << projectedVel.z() << std::endl;
+    // std::cout << "reference twist. X: "<< referenceTwist(0) << std::endl;
+
+    referenceTwist.head(3) = pose.linear().inverse() * projectedVel;
+
+    // std::cout << "Scaled cmd Vel: " << referenceTwist(0) << std::endl;
+
+    return false;
+  }
+
+  bool Sonar::checkSafety_old(Eigen::Vector6d& referenceTwist)
   {
     if(!obstacleFlag or (referenceTwist.norm() <= 0.05)) {return true;}
     
@@ -79,7 +117,7 @@ namespace tree {
     std::cout << "Sensor: " << sensorFrame << std::endl;
     std::cout << "Pose Linear: " << pose.linear() << std::endl;
     std::cout << "Projected: "<< projectedVel.x() << std::endl;
-    std::cout << "Base: " << linearVel.y() << std::endl;
+    std::cout << "Base: " << linearVel.x() << std::endl;
     
     const int relDirection = copysign(1.0, projectedVel.x()); 
     const double normProduct = projectedVel.norm() * sensorAxis.norm();
@@ -94,12 +132,16 @@ namespace tree {
       for (size_t i = 0; i < referenceTwist.head(3).size(); i++)
       {
         referenceTwist(i) *= ((currentDistance - thresholds[1])/(thresholds[0] - thresholds[1]));
+        projectedVel.x() *= ((currentDistance - thresholds[1])/(thresholds[0] - thresholds[1]));
       }
       if (currentDistance < thresholds[1])
       {
-      referenceTwist.setZero();
+        referenceTwist.setZero();
+        projectedVel.x() = 0.0;
       }
-            // referenceTwist.setZero();
+            referenceTwist.setZero();
+      // std::cout << "Projected scaled: "<< projectedVel.x() << std::endl;
+      // std::cout << "reference twist: "<< referenceTwist(0) << std::endl;
       return false;
       // std::cout << " S T O P " << std::endl;
 
@@ -125,5 +167,10 @@ namespace tree {
   double Sonar::getFOV() const
   {
     return fov;
+  }
+
+  double Sonar::checkDistance() const
+  {
+    return currentDistance;
   }
 }

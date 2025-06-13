@@ -20,6 +20,7 @@ public:
     // Safety
     bool loadParameters();
     void initSensors();
+    void sortSensors();
     void checkSafety(Eigen::Vector6d& referenceTwist);
     bool setSafetyModeCb(const std_srvs::SetBoolRequest& req, std_srvs::SetBoolResponse& res);
 
@@ -40,7 +41,10 @@ private:
     // Safety
     std::vector<std::string> sensor_names;
     using sonarMap = std::unordered_map<std::string, std::shared_ptr<tree::Sonar>>;
+    using sonarDirectionMap = std::unordered_map<std::string, sonarMap>;
+    
     sonarMap sonars; 
+    sonarDirectionMap sonar_directions;
     bool safetyMode;
     int sensorType;
     std::vector<double> sensorThresholds;
@@ -214,6 +218,37 @@ bool OmnisteeringControllerPlugin::loadParameters()
     return true;
 }
 
+void OmnisteeringControllerPlugin::sortSensors()
+{
+    // very WIP. TBD properly
+    sonarMap front_sonars, rear_sonars, left_sonars, right_sonars;
+
+    if(sonars.find("ultrasound_fl_sag") != sonars.end())
+        front_sonars["ultrasound_fl_sag"] = sonars["ultrasound_fl_sag"];
+    if(sonars.find("ultrasound_fr_sag") != sonars.end())
+        front_sonars["ultrasound_fr_sag"] = sonars["ultrasound_fr_sag"];  
+    sonar_directions["front"] = front_sonars;
+
+    if(sonars.find("ultrasound_rl_sag") != sonars.end())
+        rear_sonars["ultrasound_rl_sag"] = sonars["ultrasound_rl_sag"];
+    if(sonars.find("ultrasound_rr_sag") != sonars.end())
+        rear_sonars["ultrasound_rr_sag"] = sonars["ultrasound_rr_sag"];  
+    sonar_directions["rear"] = rear_sonars;
+    
+    if(sonars.find("ultrasound_fl_lat") != sonars.end())
+        left_sonars["ultrasound_fl_lat"] = sonars["ultrasound_fl_lat"];
+    if(sonars.find("ultrasound_rl_lat") != sonars.end())
+        left_sonars["ultrasound_rl_lat"] = sonars["ultrasound_rl_lat"];  
+    sonar_directions["left"] = left_sonars;
+
+    if(sonars.find("ultrasound_fr_lat") != sonars.end())
+        right_sonars["ultrasound_fr_lat"] = sonars["ultrasound_fr_lat"];
+    if(sonars.find("ultrasound_rr_lat") != sonars.end())
+        right_sonars["ultrasound_rr_lat"] = sonars["ultrasound_rr_lat"];  
+    sonar_directions["right"] = right_sonars;
+
+}
+
 void OmnisteeringControllerPlugin::initSensors()
 {
     switch (sensorType)
@@ -244,6 +279,9 @@ void OmnisteeringControllerPlugin::initSensors()
             safetyMode = false;
             break;
     }
+
+    sortSensors();
+
 }
 
 bool OmnisteeringControllerPlugin::setSafetyModeCb(const std_srvs::SetBoolRequest& req, std_srvs::SetBoolResponse& res)
@@ -260,15 +298,26 @@ void OmnisteeringControllerPlugin::checkSafety(Eigen::Vector6d& referenceTwist)
         return;
     }
 
-    for (const auto& [key, value] : sonars)
+    // jinfo("------------------------------------------------------------------\n");
+
+    for (const auto& [direction, sonar_map] : sonar_directions)
     {
-        value->update();
-        if (!value->checkSafety(referenceTwist)){
-            XBOT2_WARN("Safety check failed, stopping motion");
-            // referenceTwist.setZero();
-            break;
+        double min_distance=100.0;
+        std::string sensor_name="";
+        for (const auto& [name, sonar] : sonar_map)
+        {
+            sonar->update();
+            double distance = sonar->checkDistance();
+            if (distance < min_distance)
+            {
+                min_distance = distance;
+                sensor_name = name;
+            }
         }
-    }    
+        // jinfo("Direction: {}, Winner: {} , Distance: {}\n", direction, sensor_name , min_distance);
+        if(sensor_name != "")
+            sonars[sensor_name]->checkSafety(referenceTwist);
+    }
 }
 
 } // namespace XBot

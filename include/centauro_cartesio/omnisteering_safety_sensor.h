@@ -24,6 +24,7 @@ namespace tree {
       void getBitMask(Eigen::Vector6d bitMask) const;
       // virtual void run(); 
       virtual void processData(const typename RosMSG::ConstPtr& msg) = 0;
+      virtual bool checkSafety_old(Eigen::Vector6d& referenceTwist) = 0;
       virtual bool checkSafety(Eigen::Vector6d& referenceTwist) = 0;
       virtual void update() = 0;
       virtual void initialize(); 
@@ -47,7 +48,9 @@ namespace tree {
       Sonar(ros::NodeHandle _nh, std::string _topicName, std::vector<double> _thresholds, Eigen::Affine3d _pose);
       ~Sonar();
       
+      bool checkSafety_old(Eigen::Vector6d& referenceTwist) override;
       bool checkSafety(Eigen::Vector6d& referenceTwist) override;
+      double checkDistance() const;
 
       bool getObstacleFlag() const;
       double getFOV() const;
