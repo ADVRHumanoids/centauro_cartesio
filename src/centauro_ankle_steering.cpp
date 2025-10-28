@@ -14,6 +14,7 @@ SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model,
 {
     std::memset(&_log_data, 0, sizeof(_log_data));
 
+    // note: unused
     if (!hyst_comp.empty())
         _comp = HysteresisComparator::MakeHysteresisComparator(hyst_comp[0], hyst_comp[1]);
 
@@ -49,8 +50,6 @@ SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model,
         throw std::runtime_error("steering joint not found for wheel " + wheel_name);
     }
 
-//    std::cout << "found steering joint " << steering_joint->name << "\n";
-
     // re-define wheel parent
     _wheel_parent_name = steering_joint->parent_link_name;
 
@@ -68,16 +67,12 @@ SimpleSteering::SimpleSteering(XBot::ModelInterface::ConstPtr model,
     wp_T_jo.linear() = qp_q_jo.toRotationMatrix();
 
 
-//    std::cout << "found wheel parent link " << _wheel_parent_name << "\n";
-
     // get steering axis in joint frame
     auto steering_axis = steering_joint->axis;
     _local_steering_axis << steering_axis.x, steering_axis.y, steering_axis.z;
 
     // rotate to parent frame
     _local_steering_axis = wp_T_jo.linear() * _local_steering_axis;
-
-//    std::cout << "local steering axis " << _local_steering_axis.transpose() << "\n";
 
     // save steering index and joint
     _steering_id = _model->getDofIndex(steering_joint->name);
@@ -137,6 +132,7 @@ double SimpleSteering::getDofIndex() const
 
 namespace 
 {
+    // apply a dead zone on the norm of v
     Eigen::Vector3d dead_zone_norm(Eigen::Vector3d v, double th)
     {
         Eigen::Vector2d v_xy = Eigen::Vector2d(v(0), v(1));
@@ -148,6 +144,8 @@ namespace
         return Eigen::Vector3d::Zero();
 
     }
+
+    // scalar dead zone
     double dead_zone(double x, double th)
     {
         if(x > th)
@@ -163,6 +161,7 @@ namespace
         return 0.0;
     }
     
+    // sign
     double sign(double x)
     {
         return (x > 0) - (x < 0);
@@ -195,16 +194,7 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     
     /* Apply deadzone to wheel velocity */
     Eigen::Vector3d vdes_th = _local_R_world * wheel_vel;
-    
-//    vdes_th.x() = dead_zone(vdes_th.x(), _dz_th[0]);
-//    vdes_th.y() = dead_zone(vdes_th.y(), _dz_th[1]);
-
     vdes_th = dead_zone_norm(vdes_th, _dz_th);
-
-//    std::cout << _wheel_name << ", normal  dir =  " << _local_R_world.row(2) << std::endl;
-//    std::cout << _wheel_name << ", forward dir =  " << wheel_forward.transpose() << std::endl;
-//    std::cout << _wheel_name << ", theta       =  " << theta << std::endl;
-//    std::cout << _wheel_name << ", vdes        =  " << vdes_th.transpose() << std::endl;
     
     _log_data.q = q;
     _log_data.normal = _local_R_world.transpose().col(2);
@@ -222,21 +212,18 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     
     Eigen::Vector3d steering_axis = _local_R_world*w_T_wp.linear()*_local_steering_axis;
     
-//    std::cout << _wheel_name << ", theta ref   = " << des_theta_1 << std::endl;
-//    std::cout << _wheel_name << ", steering_ax = " << steering_axis.transpose() << std::endl;
-    
     _log_data.theta_ref = des_theta_1;
     _log_data.steering_axis = steering_axis;
     
+    // define the two options for the steering angle
     double des_q_1 = q  + (des_theta_1 - theta) * ::sign(steering_axis.z());
     des_q_1 = wrap_angle(des_q_1);
     
     double des_q_2 = des_q_1 + M_PI;
     des_q_2 = wrap_angle(des_q_2);
     
+    // the closest w.r.t. current position
     double closest_q = std::fabs(des_q_1-q) < std::fabs(des_q_2-q) ? des_q_1 : des_q_2;
-
-//    std::cout << _wheel_name << ": closest q =  " << closest_q << std::endl;
 
     /* Return value inside joint lims */
     if(_steering_joint->checkJointLimits(closest_q))
@@ -245,12 +232,10 @@ double SimpleSteering::computeSteeringAngle(const Eigen::Vector3d& wheel_vel)
     }
     else if(_steering_joint->checkJointLimits(des_q_1))
     {
-//        std::cout << _wheel_name << ": FALLBACK q =  " << des_q_1 << std::endl;
         _prev_qdes = des_q_1;
     }
     else if(_steering_joint->checkJointLimits(des_q_2))
     {
-//        std::cout << _wheel_name << ": FALLBACK q =  " << des_q_2 << std::endl;
         _prev_qdes = des_q_2;
     }
     else{
@@ -338,6 +323,11 @@ CentauroAnkleSteering::CentauroAnkleSteering(std::string wheel_name,
     {
         auto jnt = link->parent_joint;
 
+        if(!jnt)
+        {
+            break;
+        }
+
         if(jnt->type == urdf::Joint::REVOLUTE ||
                 jnt->type == urdf::Joint::CONTINUOUS)
         {
@@ -354,14 +344,14 @@ CentauroAnkleSteering::CentauroAnkleSteering(std::string wheel_name,
         throw std::runtime_error("steering joint not found for wheel " + wheel_name);
     }
 
-    // re-define wheel parent
+    // get model's handle to the steering joint
     _steering_joint = _model->getJoint(steering_joint->name);
     
+    // initialize _q
     _model->getJointPosition(_q);
     
+    // dof index for the steering joint
     _steering_dof_idx = _model->getDofIndex(steering_joint->name);
-    
-    _A(0, _steering_dof_idx) = 1.0;
 }
 
 void CentauroAnkleSteering::setOutwardNormal(const Eigen::Vector3d& n)
@@ -375,19 +365,24 @@ void CentauroAnkleSteering::_update()
     // get robot state
     _model->getJointPositionMinimal(_q);
 
-    // compute wheel desired velocity
+    // compute wheel desired velocity form forward kinematics
+    // NOTE: here we assume that the desired velocity for the wheel comes from
+    // the model's qdot (v)
+    // This could originate from: 
+    //  a) the QP solution at the previous step (time delayed)
+    //  b) the desired base twist has been directly set inside the model's qdot
     Eigen::Vector6d wheel_vel;
     _model->getVelocityTwist(_steering.getWheelName(), wheel_vel);
 
+    // let the steering controller compute the angle
     double q_steering = _steering.computeSteeringAngle(wheel_vel.head<3>());
     double q_current = _q(_steering_dof_idx);
-
-//    std::cout << _steering.getWheelName() << " - q_steering: " << q_steering << " q_current: " << q_current << std::endl;
     
+    // simple proportional controller to align steering q 
     double dq = _lambda*(q_steering - q_current);
     dq = std::min(std::max(dq, -_max_steering_dq), _max_steering_dq);
 
-//    std::cout << dq << std::endl;
+    // set the steering task jacobian and error
     _A(0, _steering_dof_idx) = 1.0;
     _b(0) = dq;
     

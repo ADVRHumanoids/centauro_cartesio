@@ -5,6 +5,9 @@
 
 namespace XBot { namespace Cartesian { namespace Centauro {
     
+    /* A simple comparator with hysteresis (useful to filter noisy velocity references) 
+     * Currently unused.
+     */
     class HysteresisComparator
     {
       
@@ -38,7 +41,7 @@ namespace XBot { namespace Cartesian { namespace Centauro {
 
     };
 
-    
+    /* Class that computes steering angles given the wheel center velocity */
     class SimpleSteering 
     {
       
@@ -96,6 +99,7 @@ namespace XBot { namespace Cartesian { namespace Centauro {
         
     };
     
+    /* OpenSot task to control the steering angle given the model's qdot state */
     class CentauroAnkleSteering : public OpenSoT::Task<Eigen::MatrixXd, Eigen::VectorXd>
     {
       
