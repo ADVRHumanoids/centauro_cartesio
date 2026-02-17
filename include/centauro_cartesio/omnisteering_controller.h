@@ -3,7 +3,7 @@
 
 #include "centauro_ankle_steering.h"
 #include <OpenSoT/tasks/velocity/PureRolling.h>
-#include <XBotInterface/RobotInterface.h>
+#include <xbot2_interface/robotinterface2.h>
 
 namespace XBot::Cartesian {
 

@@ -1,5 +1,5 @@
 #include <centauro_cartesio/omnisteering_controller.h>
-#include <std_msgs/Float32.h>
+#include <std_msgs/msg/float32.hpp>
 
 using namespace XBot::Cartesian;
 
